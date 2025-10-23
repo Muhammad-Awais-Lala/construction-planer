@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axiosClient from '../api/axiosClient';
+import EstimateResult from './EstimateResult';
 
 const EstimatePlanner = () => {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     areaValue: '',
     unit: 'Marla',
     marlaStandard: '272.25 (Lahore/old)',
@@ -10,11 +11,11 @@ const EstimatePlanner = () => {
     overallWidth: '',
     city: 'Faisalabad',
     quality: 'Standard',
-    numberOfFloors: '',
+    numberOfFloors: '1',
     numberOfBedrooms: '',
     numberOfBathrooms: '',
-    numberOfKitchens: '',
-    numberOfLivingRooms: '',
+    numberOfKitchens: '1',
+    numberOfLivingRooms: '1',
     drawingDining: 'Required',
     garage: 'Required',
     style: 'Pakistani',
@@ -25,7 +26,32 @@ const EstimatePlanner = () => {
     steel: '',
     sand: '',
     crush: ''
-  });
+  }
+  const [formData, setFormData] = useState(initialFormData);
+
+  // Map of marla standards -> area (marla) -> width/length
+  const MARLA_STANDARDS = {
+    "225 (Govt)": {
+      3: { width: 18, length: 37 },
+      4: { width: 25, length: 36 },
+      5: { width: 25, length: 45 },
+      6: { width: 30, length: 45 },
+      7: { width: 35, length: 45 },
+      8: { width: 30, length: 60 },
+      9: { width: 35, length: 58 },
+      10: { width: 35, length: 65 }
+    },
+    "272.25 (Lahore/old)": {
+      3: { width: 20, length: 40.8 },
+      4: { width: 25, length: 43.6 },
+      5: { width: 25, length: 54.5 },
+      6: { width: 30, length: 54.5 },
+      7: { width: 30, length: 63.5 },
+      8: { width: 35, length: 62.2 },
+      9: { width: 35, length: 70 },
+      10: { width: 35, length: 77.8 }
+    }
+  };
 
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -33,10 +59,29 @@ const EstimatePlanner = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    // If marlaStandard changed, compute overall dimensions for current area
+    if (name === 'marlaStandard') {
+      setFormData(prev => {
+        const next = { ...prev, [name]: value };
+        const area = Number(next.areaValue);
+        if (!isNaN(area) && area >= 3 && area <= 10) {
+          const dims = MARLA_STANDARDS[value]?.[area];
+          if (dims) {
+            next.overallLength = dims.length;
+            next.overallWidth = dims.width;
+          } else {
+            next.overallLength = '';
+            next.overallWidth = '';
+          }
+        }
+        return next;
+      });
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -46,6 +91,47 @@ const EstimatePlanner = () => {
       }));
     }
   };
+
+  
+    const handleAreaChange = (e) => {
+      let value = e.target.value;
+      // Convert to number
+      const area = Number(value);
+
+      // Limit within range
+      if (area < 3) value = 3;
+      if (area > 10) value = 10;
+      if (area === 0 || isNaN(area)) {
+        value = "";
+      }
+      // console.log('Derived Area:', area);
+      // console.log('Input Value:', value);
+
+      let derivedRooms;
+      if (area === 3) {
+        derivedRooms = 1;
+      } else if (area >= 4 && area <= 7) {
+        derivedRooms = 2;
+      } else if (area >= 8 && area <= 10) {
+        derivedRooms = 3;
+      } else {
+        derivedRooms = 1; // fallback for area 3
+      }
+
+      // Compute overall dimensions for current marla standard (if possible)
+      const selectedStandard = formData.marlaStandard || '272.25 (Lahore/old)';
+      let overallLength = '';
+      let overallWidth = '';
+      if (!isNaN(area) && area >= 3 && area <= 10) {
+        const dims = MARLA_STANDARDS[selectedStandard]?.[area];
+        if (dims) {
+          overallLength = dims.length;
+          overallWidth = dims.width;
+        }
+      }
+
+      setFormData(prev => ({ ...prev, numberOfBedrooms: derivedRooms, numberOfBathrooms: derivedRooms, areaValue: value, overallLength, overallWidth }));
+    }
 
   const validateForm = () => {
     const newErrors = {};
@@ -91,51 +177,74 @@ const EstimatePlanner = () => {
 
     try {
       const payload = {
-        area_value: parseFloat(formData.areaValue),
+        area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
         unit: formData.unit,
         marla_standard: formData.marlaStandard,
         quality: formData.quality,
         city: formData.city,
-        overall_length: parseFloat(formData.overallLength),
-        overall_width: parseFloat(formData.overallWidth),
-        bedrooms: parseFloat(formData.numberOfBedrooms),
-        bathrooms: parseFloat(formData.numberOfBathrooms),
-        kitchen_size: formData.kitchenSize !== '' ? parseFloat(formData.kitchenSize) : null,
-        living_rooms: parseFloat(formData.numberOfLivingRooms),
+        overall_length: formData.overallLength,
+        overall_width: formData.overallWidth,
+        bedrooms: formData.numberOfBedrooms ,
+        bathrooms: formData.numberOfBathrooms ,
+        living_rooms: formData.numberOfLivingRooms ,
         drawing_dining: formData.drawingDining,
         garage: formData.garage,
-        floors: parseFloat(formData.numberOfFloors),
+        floors: formData.numberOfFloors,
         extra_features: formData.extraFeatures,
-        style: formData.style,
-        bricks: formData.bricks !== '' ? parseFloat(formData.bricks) : null,
-        cement: formData.cement !== '' ? parseFloat(formData.cement) : null,
-        steel: formData.steel !== '' ? parseFloat(formData.steel) : null,
-        sand: formData.sand !== '' ? parseFloat(formData.sand) : null,
-        crush: formData.crush !== '' ? parseFloat(formData.crush) : null
+        style: formData.style
+        // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
       };
+      // const payload = {
+      //   area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
+      //   unit: formData.unit,
+      //   marla_standard: formData.marlaStandard,
+      //   quality: formData.quality,
+      //   city: formData.city,
+      //   overall_length: formData.overallLength ? parseFloat(formData.overallLength) : undefined,
+      //   overall_width: formData.overallWidth ? parseFloat(formData.overallWidth) : undefined,
+      //   bedrooms: formData.numberOfBedrooms ? parseFloat(formData.numberOfBedrooms) : undefined,
+      //   bathrooms: formData.numberOfBathrooms ? parseFloat(formData.numberOfBathrooms) : undefined,
+      //   living_rooms: formData.numberOfLivingRooms ? parseFloat(formData.numberOfLivingRooms) : undefined,
+      //   drawing_dining: formData.drawingDining,
+      //   garage: formData.garage,
+      //   floors: formData.numberOfFloors ? parseFloat(formData.numberOfFloors) : undefined,
+      //   extra_features: formData.extraFeatures,
+      //   style: formData.style
+      //   // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
+      // };
+
+      console.log('Payload:', payload);
 
       const response = await axiosClient.post('/estimate', payload);
       setResponse({
         success: true,
         data: response.data
       });
+      window.toastify('Estimate generated successfully', 'success');
     } catch (error) {
       setResponse({
         success: false,
         error: error.response?.data?.message || 'An error occurred while getting the estimate'
       });
+      window.toastify('Failed to generate estimate', 'error');
     } finally {
       setLoading(false);
+      setFormData(initialFormData);
     }
   };
 
+  // If we have a successful response with data, show the result component
+  if (response && response.success && response.data) {
+    return <EstimateResult result={response.data.result} />;
+  }
+
   return (
-    < div className="py-5">
+    <div className="py-5">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-10">
             <div className="card shadow-lg">
-              <div className="card-header bg-dark text-white text-center">
+              <div className="card-header bg-primary text-white text-center">
                 <h2 className="mb-0">Construction Estimate Planner</h2>
               </div>
               <div className="card-body p-4">
@@ -151,28 +260,12 @@ const EstimatePlanner = () => {
                         id="areaValue"
                         name="areaValue"
                         value={formData.areaValue}
-                        onChange={(e) => {
-                          let value = e.target.value;
-
-                          // Allow empty value (so user can clear)
-                          // if (value === '') {
-                          //   setFormData({ ...formData, areaValue: '' });
-                          //   return;
-                          // }
-
-                          // Convert to number
-                          const num = Number(value);
-
-                          // Limit within range
-                          if (num < 3) value = 3;
-                          if (num > 10) value = 10;
-
-                          setFormData({ ...formData, areaValue: value });
-                        }}
+                        onChange={handleAreaChange}
                         placeholder="Enter area value"
                         min={3}
                         max={10}
-                        
+                      // defaultValue={3}
+
                       />
 
                       {errors.areaValue && <div className="invalid-feedback">{errors.areaValue}</div>}
@@ -508,7 +601,7 @@ const EstimatePlanner = () => {
                     <div className="col-12">
                       <button
                         type="submit"
-                        className="btn btn-dark w-100"
+                        className="btn btn-primary w-100"
                         disabled={loading}
                       >
                         {loading ? (
@@ -525,7 +618,7 @@ const EstimatePlanner = () => {
                 </form>
 
                 {/* Response Display */}
-                {response && (
+                {/* {response && (
                   <div className="mt-4">
                     {response.success ? (
                       <div className="alert alert-success" role="alert">
@@ -539,7 +632,7 @@ const EstimatePlanner = () => {
                       </div>
                     )}
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>
