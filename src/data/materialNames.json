@@ -1,0 +1,67 @@
+{
+  "Sand": [
+    "Sand-Chenab",
+    "Sand-Ghassu (Slit Sand)",
+    "Sand-Ghazi",
+    "Sand-Lawrencepur",
+    "Sand-Ravi",
+    "Sand-Bholari",
+    "Sand-Fresh Nadi",
+    "Sand-Hub",
+    "Sand-Hyderabad",
+    "Sand-Jhampir",
+    "Sand-Kotri",
+    "Sand-Lasbela",
+    "Sand-Makli",
+    "Sand-Malir",
+    "Sand-Moram",
+    "Sand-Thatta",
+    "Sand-Ghazi",
+    "Sand-Lawrencepur"
+  ],
+  "Bricks": [
+    "Bricks- ( B Class )",
+    "Bricks-Awal ( A Class Machine Made )",
+    "Bricks-Awwal ( A Class )",
+    "Bricks-Awwal ( A+ Class )",
+    "Bricks-Awwal Tiles ( A Class )",
+    "Bricks-Ballast ( Rora )",
+    "Bricks-Khanggar ( C Class )"
+  ],
+  "Cement": [
+    "Cement-Bestway OPC",
+    "Cement-Cherat",
+    "Cement-DG OPC",
+    "Cement-Fauji OPC",
+    "Cement-Flying OPC",
+    "Cement-Lucky OPC",
+    "Cement-Maple Leaf OPC"
+  ],
+  "Steel": [
+    "Steel-Bar 60-Grade AF Steel",
+    "Steel-Bar 60-Grade Amreli Steel",
+    "Steel-Bar 60-Grade FF Steel",
+    "Steel-Bar 60-Grade Ittefaq Steel",
+    "Steel-Bar 60-Grade Kamran Steel",
+    "Steel-Bar 60-Grade MS Steel",
+    "Steel-Bar 60-Grade Mughal Steel",
+    "Steel-Bar 60-Grade Saeed Steel"
+  ],
+  "Crush": [
+    "Crush-Deena Bajar (1 Inche-1.25 Inches)",
+    "Crush-Margalla",
+    "Crush-Mix Bajar (Kaccha)",
+    "Crush-Sargodha Bajri (4 Sooter Or 15-20mm)",
+    "Crush-(Hassan Peer,Hub,Thatta) 10-25mm",
+    "Crush-Khaka",
+    "Crush-Stone Soling (Rohra) 2\"-3\" 50-80mm",
+    "Crush-Margalla",
+    "Crush-Margalla (2-Sooter 5-10mm)",
+    "Crush-Margalla (3-Sooter 10-15mm)",
+    "Crush-Margalla (4-Sooter 15-20mm)",
+    "Crush-Margalla Bajri Mix (4 Sooter- 6 Sooter 15-25mm)",
+    "Crush-Margalla Bajri Mix (8 Sooter- 16 Sooter 50-80mm)",
+    "Crush-Mix Bajar (Kaccha)",
+    "Crush-Stone Dust (Khaka 0-0.5mm)"
+  ]
+}

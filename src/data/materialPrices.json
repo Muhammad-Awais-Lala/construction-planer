@@ -1,0 +1,67 @@
+{
+  "Sand": [
+    {"name": "Sand-Chenab", "price": 75.0},
+    {"name": "Sand-Ghassu (Slit Sand)", "price": 30.0},
+    {"name": "Sand-Ghazi", "price": 190.0},
+    {"name": "Sand-Lawrencepur", "price": 180.0},
+    {"name": "Sand-Ravi", "price": 35.0},
+    {"name": "Sand-Bholari", "price": 65.0},
+    {"name": "Sand-Fresh Nadi", "price": 55.0},
+    {"name": "Sand-Hub", "price": 52.0},
+    {"name": "Sand-Hyderabad", "price": 65.0},
+    {"name": "Sand-Jhampir", "price": 65.0},
+    {"name": "Sand-Kotri", "price": 65.0},
+    {"name": "Sand-Lasbela", "price": 63.0},
+    {"name": "Sand-Makli", "price": 60.0},
+    {"name": "Sand-Malir", "price": 50.0},
+    {"name": "Sand-Moram", "price": 38.0},
+    {"name": "Sand-Thatta", "price": 55.0},
+    {"name": "Sand-Ghazi", "price": 120.0},
+    {"name": "Sand-Lawrencepur", "price": 95.0}
+  ],
+  "Bricks": [
+    {"name": "Bricks- ( B Class )", "price": 17.0},
+    {"name": "Bricks-Awal ( A Class Machine Made )", "price": 19.0},
+    {"name": "Bricks-Awwal ( A Class )", "price": 19.0},
+    {"name": "Bricks-Awwal ( A+ Class )", "price": 19.0},
+    {"name": "Bricks-Awwal Tiles ( A Class )", "price": 19.0},
+    {"name": "Bricks-Ballast ( Rora )", "price": 80.0},
+    {"name": "Bricks-Khanggar ( C Class )", "price": 16.0}
+  ],
+  "Cement": [
+    {"name": "Cement-Bestway OPC", "price": 1350.0},
+    {"name": "Cement-Cherat", "price": 1355.0},
+    {"name": "Cement-DG OPC", "price": 1370.0},
+    {"name": "Cement-Fauji OPC", "price": 1360.0},
+    {"name": "Cement-Flying OPC", "price": 1325.0},
+    {"name": "Cement-Lucky OPC", "price": 1310.0},
+    {"name": "Cement-Maple Leaf OPC", "price": 1375.0}
+  ],
+  "Steel": [
+    {"name": "Steel-Bar 60-Grade AF Steel", "price": 240.0},
+    {"name": "Steel-Bar 60-Grade Amreli Steel", "price": 242.0},
+    {"name": "Steel-Bar 60-Grade FF Steel", "price": 242.0},
+    {"name": "Steel-Bar 60-Grade Ittefaq Steel", "price": 240.0},
+    {"name": "Steel-Bar 60-Grade Kamran Steel", "price": 240.0},
+    {"name": "Steel-Bar 60-Grade MS Steel", "price": 238.0},
+    {"name": "Steel-Bar 60-Grade Mughal Steel", "price": 244.0},
+    {"name": "Steel-Bar 60-Grade Saeed Steel", "price": 238.0}
+  ],
+  "Crush": [
+    {"name": "Crush-Deena Bajar (1 Inche-1.25 Inches)", "price": 95.0},
+    {"name": "Crush-Margalla", "price": 175.0},
+    {"name": "Crush-Mix Bajar (Kaccha)", "price": 125.0},
+    {"name": "Crush-Sargodha Bajri (4 Sooter Or 15-20mm)", "price": 155.0},
+    {"name": "Crush-(Hassan Peer,Hub,Thatta) 10-25mm", "price": 65.0},
+    {"name": "Crush-Khaka", "price": 55.0},
+    {"name": "Crush-Stone Soling (Rohra) 2\"-3\" 50-80mm", "price": 62.0},
+    {"name": "Crush-Margalla", "price": 120.0},
+    {"name": "Crush-Margalla (2-Sooter 5-10mm)", "price": 90.0},
+    {"name": "Crush-Margalla (3-Sooter 10-15mm)", "price": 110.0},
+    {"name": "Crush-Margalla (4-Sooter 15-20mm)", "price": 90.0},
+    {"name": "Crush-Margalla Bajri Mix (4 Sooter- 6 Sooter 15-25mm)", "price": 105.0},
+    {"name": "Crush-Margalla Bajri Mix (8 Sooter- 16 Sooter 50-80mm)", "price": 103.0},
+    {"name": "Crush-Mix Bajar (Kaccha)", "price": 90.0},
+    {"name": "Crush-Stone Dust (Khaka 0-0.5mm)", "price": 80.0}
+  ]
+}

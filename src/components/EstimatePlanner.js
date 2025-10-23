@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axiosClient from '../api/axiosClient';
 import EstimateResult from './EstimateResult';
 
-const EstimatePlanner = () => {
+const EstimatePlanner = ({ onEstimateComplete }) => {
   const initialFormData = {
     areaValue: '',
     unit: 'Marla',
@@ -176,51 +176,55 @@ const EstimatePlanner = () => {
     setResponse(null);
 
     try {
-      const payload = {
-        area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
-        unit: formData.unit,
-        marla_standard: formData.marlaStandard,
-        quality: formData.quality,
-        city: formData.city,
-        overall_length: formData.overallLength,
-        overall_width: formData.overallWidth,
-        bedrooms: formData.numberOfBedrooms ,
-        bathrooms: formData.numberOfBathrooms ,
-        living_rooms: formData.numberOfLivingRooms ,
-        drawing_dining: formData.drawingDining,
-        garage: formData.garage,
-        floors: formData.numberOfFloors,
-        extra_features: formData.extraFeatures,
-        style: formData.style
-        // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
-      };
       // const payload = {
       //   area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
       //   unit: formData.unit,
       //   marla_standard: formData.marlaStandard,
       //   quality: formData.quality,
       //   city: formData.city,
-      //   overall_length: formData.overallLength ? parseFloat(formData.overallLength) : undefined,
-      //   overall_width: formData.overallWidth ? parseFloat(formData.overallWidth) : undefined,
-      //   bedrooms: formData.numberOfBedrooms ? parseFloat(formData.numberOfBedrooms) : undefined,
-      //   bathrooms: formData.numberOfBathrooms ? parseFloat(formData.numberOfBathrooms) : undefined,
-      //   living_rooms: formData.numberOfLivingRooms ? parseFloat(formData.numberOfLivingRooms) : undefined,
+      //   overall_length: formData.overallLength,
+      //   overall_width: formData.overallWidth,
+      //   bedrooms: formData.numberOfBedrooms ,
+      //   bathrooms: formData.numberOfBathrooms ,
+      //   living_rooms: formData.numberOfLivingRooms ,
       //   drawing_dining: formData.drawingDining,
       //   garage: formData.garage,
-      //   floors: formData.numberOfFloors ? parseFloat(formData.numberOfFloors) : undefined,
+      //   floors: formData.numberOfFloors,
       //   extra_features: formData.extraFeatures,
       //   style: formData.style
-      //   // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
       // };
-
-      console.log('Payload:', payload);
+      const payload = {
+        area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
+        unit: formData.unit,
+        marla_standard: formData.marlaStandard,
+        quality: formData.quality,
+        city: formData.city,
+        overall_length: formData.overallLength ? parseFloat(formData.overallLength) : undefined,
+        overall_width: formData.overallWidth ? parseFloat(formData.overallWidth) : undefined,
+        bedrooms: formData.numberOfBedrooms ? parseFloat(formData.numberOfBedrooms) : undefined,
+        bathrooms: formData.numberOfBathrooms ? parseFloat(formData.numberOfBathrooms) : undefined,
+        living_rooms: formData.numberOfLivingRooms ? parseFloat(formData.numberOfLivingRooms) : undefined,
+        drawing_dining: formData.drawingDining,
+        garage: formData.garage,
+        floors: formData.numberOfFloors ? parseFloat(formData.numberOfFloors) : undefined,
+        extra_features: formData.extraFeatures,
+        style: formData.style
+        // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
+      };
 
       const response = await axiosClient.post('/estimate', payload);
+      const responseData = response.data;
       setResponse({
         success: true,
-        data: response.data
+        data: responseData
       });
+      console.log('Response:', responseData);
       window.toastify('Estimate generated successfully', 'success');
+      
+      // Call the onEstimateComplete callback with the response data
+      if (onEstimateComplete) {
+        onEstimateComplete(responseData);
+      }
     } catch (error) {
       setResponse({
         success: false,

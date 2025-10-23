@@ -1,10 +1,14 @@
 import React from 'react';
-import EstimatePlanner from '../components/EstimatePlanner';
+import ConstructionSteps from '../components/ConstructionSteps';
 
 const Home = () => {
   return (
-    <div>
-      <EstimatePlanner />
+    <div className="container-fluid py-4">
+      <div className="row justify-content-center">
+        <div className="col-12">
+          <ConstructionSteps />
+        </div>
+      </div>
     </div>
   );
 };

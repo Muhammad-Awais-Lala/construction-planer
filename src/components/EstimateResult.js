@@ -1,119 +1,266 @@
-import React from 'react';
+import React, { useState } from 'react';
+import materialsData from '../data/materialPrices.json';
 
 const EstimateResult = ({ result }) => {
-  if (!result) return null;
+    
+    const { materials, cost } = result;
+    // Initialize selected prices dynamically for each material type
+    const initialPrices = Object.keys(materials)
+    .filter((key) => materialsData[key]) // only include materials available in data
+    .reduce((acc, key) => {
+        acc[key] = materialsData[key][0]?.price || 0;
+        return acc;
+    }, {});
 
-  const { materials, cost, plan, designs } = result;
+    const [selectedPrices, setSelectedPrices] = useState(initialPrices);
+    
+    if (!result) return null;
+
 
   // Format number with commas for better readability
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatNumber = (num) =>
+    num?.toLocaleString('en-PK', { maximumFractionDigits: 0 });
+
+  // Handle change for any dropdown
+  const handleSelectChange = (material, value) => {
+    const selectedItem = materialsData[material].find(
+      (item) => item.name === value
+    );
+    setSelectedPrices((prev) => ({
+      ...prev,
+      [material]: selectedItem?.price || 0,
+    }));
   };
 
   return (
     <div className="container py-5">
       <div className="row">
-        {/* Materials Table */}
-        <div className="col-lg-6 mb-4">
+        <div className="col mb-4">
           <div className="card shadow">
             <div className="card-header bg-primary text-white">
               <h3 className="card-title mb-0">Required Materials</h3>
             </div>
+
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-hover">
+                <table className="table table-hover align-middle">
                   <thead className="table-light">
                     <tr>
                       <th>Material</th>
                       <th className="text-end">Quantity</th>
+                      <th>Quality</th>
+                      <th className="text-end">Total Price (Rs.)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(materials).map(([material, value]) => (
-                      <tr key={material}>
-                        <td>{material}</td>
-                        <td className="text-end">{typeof value === 'number' ? formatNumber(value) : value}</td>
-                      </tr>
-                    ))}
+                    {Object.entries(materials).map(([material, quantity]) => {
+                      // Skip invalid or non-material keys
+                      if (material === 'Materials Cost (PKR)' || !materialsData[material]) return null;
+
+                      const options = materialsData[material];
+                      const selectedPrice = selectedPrices[material] || 0;
+                      const total = selectedPrice * quantity;
+
+                      return (
+                        <tr key={material}>
+                          <td className="fw-semibold">{material}</td>
+                          <td className="text-end">{formatNumber(quantity)}</td>
+                          <td>
+                            <select
+                              className="form-select"
+                              value={
+                                options.find(
+                                  (item) => item.price === selectedPrice
+                                )?.name || ''
+                              }
+                              onChange={(e) =>
+                                handleSelectChange(material, e.target.value)
+                              }
+                            >
+                              {options.map((opt, i) => (
+                                <option key={i} value={opt.name}>
+                                  {opt.name} — Rs. {opt.price}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="text-end fw-bold">
+                            Rs. {formatNumber(Math.round(total))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Cost Table */}
-        <div className="col-lg-6 mb-4">
-          <div className="card shadow">
-            <div className="card-header bg-primary text-white">
-              <h3 className="card-title mb-0">Cost Breakdown</h3>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-hover">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Item</th>
-                      <th className="text-end">Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Covered Area</td>
-                      <td className="text-end">{formatNumber(cost.covered_sqft)} sq.ft</td>
-                    </tr>
-                    <tr>
-                      <td>Grey Structure Cost</td>
-                      <td className="text-end">PKR {formatNumber(cost.grey_cost)}</td>
-                    </tr>
-                    <tr>
-                      <td>Finishing Cost</td>
-                      <td className="text-end">PKR {formatNumber(cost.finishing_cost)}</td>
-                    </tr>
-                    <tr>
-                      <td>City Factor</td>
-                      <td className="text-end">{cost.city_factor}</td>
-                    </tr>
-                    <tr className="table-primary fw-bold">
-                      <td>Total Cost</td>
-                      <td className="text-end">PKR {formatNumber(cost.total_cost)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
+                {/* Optional total display */}
+                
+                  <div className="text-end mt-3">
+                    <h5 className="fw-bold">
+                      {/* Total Estimated Cost: Rs. {formatNumber(materials['Materials Cost (PKR)'])} */}
+                    Total Estimated Cost: Rs. {formatNumber(Math.round(Object.entries(materials).reduce((sum, [material, quantity]) => {
+                        if (material === 'Materials Cost (PKR)' || !materialsData[material]) return sum;
+                        return sum + (selectedPrices[material] || 0) * quantity;
+                    }, 0)))}
 
-        {/* Design Suggestions */}
-        {/* <div className="col-12 mb-4">
-          <div className="card shadow">
-            <div className="card-header bg-primary text-white">
-              <h3 className="card-title mb-0">Suggested Designs</h3>
-            </div>
-            <div className="card-body">
-              <div className="row">
-                {designs.map((design, index) => (
-                  <div key={index} className="col-md-4 mb-3">
-                    <div className="card h-100">
-                      <div className="card-body">
-                        <h5 className="card-title">{design.name}</h5>
-                        <p className="card-text">{design.summary}</p>
-                        <h6 className="mt-3">Best For:</h6>
-                        <p className="card-text">{design.best_for}</p>
-                        <h6 className="mt-3">Note:</h6>
-                        <p className="card-text">{design.note}</p>
-                      </div>
-                    </div>
+                    </h5>
                   </div>
-                ))}
+            
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );
 };
 
 export default EstimateResult;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState } from 'react';
+// import materialsData from '../data/materialPrices.json'
+
+// const EstimateResult = ({ result }) => {
+//     const [selectedBrickPrice, setSelectedBrickPrice] = useState(materialsData.Bricks[0].price);
+//     const [selectedCementPrice, setSelectedCementPrice] = useState(materialsData.Cement[0].price);
+//     const [selectedCrushPrice, setSelectedCrushPrice] = useState(materialsData.Crush[0].price);
+    
+//     if (!result) return null;
+
+//     const { materials, cost, plan, designs } = result;
+    
+//     // Format number with commas for better readability
+//     const formatNumber = (num) => {
+//         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//     };
+    
+//     return (
+//         <div className="container py-5">
+//             <div className="row">
+//                 {/* Materials Table */}
+//                 <div className="col mb-4">
+//                     <div className="card shadow">
+//                         <div className="card-header bg-primary text-white">
+//                             <h3 className="card-title mb-0">Required Materials</h3>
+//                         </div>
+//                         <div className="card-body">
+//                             <div className="table-responsive">
+//                                 <table className="table table-hover">
+//                                     <thead className="table-light">
+//                                         <tr>
+//                                             <th>Material</th>
+//                                             <th className="">Quantity</th>
+//                                             <th className="">Quality</th>
+//                                             <th className="">Price</th>
+//                                         </tr>
+//                                     </thead>
+//                                     <tbody>
+//                                         {/* {Object.entries(materials).map(([material, value]) => (
+//                                                               <tr key={material}>
+//                                                                 <td>{material}</td>
+//                                                                 <td className="text-end">{typeof value === 'number' ? formatNumber(value) : value}</td>
+//                                                               </tr>
+//                                                             ))} */}
+
+//                                         <tr>
+//                                             <td>Bricks (Units)</td>
+//                                             <td>{materials.Bricks}</td>
+//                                             <td>
+//                                                 <select
+//                                                     className="form-select"
+//                                                     onChange={(e) => {
+//                                                         const selectedBrick = materialsData.Bricks.find(
+//                                                             brick => brick.name === e.target.value
+//                                                         );
+//                                                         setSelectedBrickPrice(selectedBrick.price);
+//                                                     }}
+//                                                 >
+//                                                     {
+//                                                         materialsData.Bricks.map((brick, index) => (
+//                                                             <option key={index} value={brick.name}>{brick.name} - Rs. {brick.price}</option>
+//                                                         ))
+//                                                     }
+//                                                 </select>
+//                                             </td>
+//                                             <td className='fw-bold'>Rs. {formatNumber(Math.round(selectedBrickPrice * materials.Bricks))}</td>
+//                                         </tr>
+
+//                                         <tr>
+//                                             <td>Cement (sack)</td>
+//                                             <td>{materials.Cement}</td>
+//                                             <td>
+//                                                 <select
+//                                                     className="form-select"
+//                                                     onChange={(e) => {
+//                                                         const selectedCement = materialsData.Cement.find(
+//                                                             cement => cement.name === e.target.value
+//                                                         );
+//                                                         setSelectedCementPrice(selectedCement.price);
+//                                                     }}
+//                                                 >
+//                                                     {
+//                                                         materialsData.Cement.map((cementtype, index) => (
+//                                                             <option key={index} value={cementtype.name}>{cementtype.name} - Rs. {cementtype.price}</option>
+//                                                         ))
+//                                                     }
+//                                                 </select>
+//                                             </td>
+//                                             <td className='fw-bold'>Rs. {formatNumber(Math.round(selectedCementPrice * materials.Cement))}</td>
+//                                         </tr>
+//                                         <tr>
+//                                             <td>Crushed Stone (ton)</td>
+//                                             <td>{materials.Crush}</td>
+//                                             <td>
+//                                                 <select
+//                                                     className="form-select"
+//                                                     onChange={(e) => {
+//                                                         const selectedCrush = materialsData.Crush.find(
+//                                                             crush => crush.name === e.target.value
+//                                                         );
+//                                                         setSelectedCrushPrice(selectedCrush.price);
+//                                                     }}
+//                                                 >
+//                                                     {
+//                                                         materialsData.Crush.map((crushType, index) => (
+//                                                             <option key={index} value={crushType.name}>{crushType.name} - Rs. {crushType.price}</option>
+//                                                         ))
+//                                                     }
+//                                                 </select>
+//                                             </td>
+//                                             <td className='fw-bold'>Rs. {formatNumber(Math.round(selectedCrushPrice * materials.Crush))}</td>
+//                                         </tr>
+//                                     </tbody>
+//                                 </table>
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default EstimateResult;
+
