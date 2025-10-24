@@ -49,7 +49,8 @@ const ConstructionSteps = () => {
   const handleReset = () => {
     setActiveStep(0);
     setEstimateData(null);
-    localStorage.removeItem('constructionEstimate');
+    // localStorage.removeItem('constructionEstimate');
+    localStorage.clear();
   };
 
   const renderStepContent = () => {
@@ -57,7 +58,7 @@ const ConstructionSteps = () => {
       case 0:
         return <EstimatePlanner onEstimateComplete={handleEstimateComplete} />;
       case 1:
-        return <EstimateResult result={estimateData?.result} />;
+        return <EstimateResult result={estimateData?.result} onConfirm={handleNext} />;
       case 2:
         return <Report result={estimateData?.result} />;
       default:

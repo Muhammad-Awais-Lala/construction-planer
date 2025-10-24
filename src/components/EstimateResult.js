@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import materialsData from '../data/materialPrices.json';
 
-const EstimateResult = ({ result }) => {
+const EstimateResult = ({ result, onConfirm }) => {
     
     const { materials, cost } = result;
+
+    console.log('Materials:', materials);
     // Initialize selected prices dynamically for each material type
     const initialPrices = Object.keys(materials)
     .filter((key) => materialsData[key]) // only include materials available in data
@@ -30,6 +32,30 @@ const EstimateResult = ({ result }) => {
       ...prev,
       [material]: selectedItem?.price || 0,
     }));
+  };
+
+  // Confirm materials: compute per-material totals and save to localStorage
+  const handleConfirm = () => {
+    try {
+      const materialsSummary = Object.entries(materials).reduce((acc, [material, quantity]) => {
+        if (material === 'Materials Cost (PKR)' || !materialsData[material]) return acc;
+        const unitPrice = selectedPrices[material] || 0;
+        const totalPrice = unitPrice * quantity;
+        acc.push({ material, quantity, unitPrice, totalPrice });
+        return acc;
+      }, []);
+
+      const totalMaterialsCost = materialsSummary.reduce((s, m) => s + (m.totalPrice || 0), 0);
+
+      // Store in localStorage
+      localStorage.setItem('constructionMaterials', JSON.stringify(materialsSummary));
+      localStorage.setItem('constructionTotalMaterialsCost', String(Math.round(totalMaterialsCost)));
+
+      // call parent callback to advance stepper
+      if (typeof onConfirm === 'function') onConfirm();
+    } catch (err) {
+      console.error('Failed to confirm materials', err);
+    }
   };
 
   return (
@@ -98,12 +124,18 @@ const EstimateResult = ({ result }) => {
                   <div className="text-end mt-3">
                     <h5 className="fw-bold">
                       {/* Total Estimated Cost: Rs. {formatNumber(materials['Materials Cost (PKR)'])} */}
-                    Total Estimated Cost: Rs. {formatNumber(Math.round(Object.entries(materials).reduce((sum, [material, quantity]) => {
+                    Total Estimated Material Cost: Rs. {formatNumber(Math.round(Object.entries(materials).reduce((sum, [material, quantity]) => {
                         if (material === 'Materials Cost (PKR)' || !materialsData[material]) return sum;
                         return sum + (selectedPrices[material] || 0) * quantity;
                     }, 0)))}
 
                     </h5>
+                  </div>
+                  
+                  <div className="d-flex justify-content-end mt-3">
+                    <button className="btn btn-success" onClick={handleConfirm}>
+                      Confirm Materials
+                    </button>
                   </div>
             
               </div>
