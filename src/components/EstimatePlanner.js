@@ -35,7 +35,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       3: { width: 18, length: 37 },
       4: { width: 25, length: 36 },
       5: { width: 25, length: 45 },
-      6: { width: 30, length: 45 },
+      6 : { width: 30, length: 45 },
       7: { width: 35, length: 45 },
       8: { width: 30, length: 60 },
       9: { width: 35, length: 58 },
@@ -43,9 +43,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     },
     "272.25 (Lahore/old)": {
       3: { width: 20, length: 40.8 },
-      4: { width: 25, length: 43.6 },
+      4: { width: 25, length: 43.6  },
       5: { width: 25, length: 54.5 },
-      6: { width: 30, length: 54.5 },
+      6 : { width: 30, length: 54.5 },
       7: { width: 30, length: 63.5 },
       8: { width: 35, length: 62.2 },
       9: { width: 35, length: 70 },
@@ -255,7 +255,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 <form onSubmit={handleSubmit}>
                   <div className="row">
                     {/* Area Value */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="areaValue" className="form-label">Area Value *</label>
 
                       <input
@@ -276,7 +276,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Unit */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="unit" className="form-label">Unit</label>
                       <select
                         className="form-select"
@@ -292,7 +292,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Marla Standard */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="marlaStandard" className="form-label">Marla Standard</label>
                       <select
                         className="form-select"
@@ -307,7 +307,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Overall Length */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="overallLength" className="form-label">Overall Length *</label>
                       <input
                         type="number"
@@ -322,7 +322,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Overall Width */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="overallWidth" className="form-label">Overall Width *</label>
                       <input
                         type="number"
@@ -337,7 +337,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* City */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="city" className="form-label">City</label>
                       <select
                         className="form-select"
@@ -358,7 +358,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Quality */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                     <label htmlFor="quality" className="form-label">Quality</label>
                     <select
                       className="form-select"
@@ -374,7 +374,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                   </div> */}
 
                     {/* Number of Floors */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="numberOfFloors" className="form-label">Number of Floors *</label>
                       <input
                         type="number"
@@ -391,7 +391,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Number of Bedrooms */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="numberOfBedrooms" className="form-label">Number of Bedrooms *</label>
                       <input
                         type="number"
@@ -406,7 +406,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Number of Bathrooms */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="numberOfBathrooms" className="form-label">Number of Bathrooms *</label>
                       <input
                         type="number"
@@ -421,7 +421,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Number of Kitchens */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="numberOfKitchens" className="form-label">Number of Kitchens *</label>
                       <input
                         type="number"
@@ -438,7 +438,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Number of Living Rooms */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="numberOfLivingRooms" className="form-label">Number of Living Rooms *</label>
                       <input
                         type="number"
@@ -455,7 +455,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Kitchen Size */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="kitchenSize" className="form-label">Kitchen Size</label>
                       <input
                         type="number"
@@ -469,7 +469,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div> */}
 
                     {/* Bricks */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                   <label htmlFor="bricks" className="form-label">Bricks</label>
                   <input
                     type="number"
@@ -483,7 +483,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 </div> */}
 
                     {/* Cement */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                   <label htmlFor="cement" className="form-label">Cement</label>
                   <input
                     type="number"
@@ -497,7 +497,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 </div> */}
 
                     {/* Steel */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                   <label htmlFor="steel" className="form-label">Steel</label>
                   <input
                     type="number"
@@ -511,7 +511,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 </div> */}
 
                     {/* Sand */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                   <label htmlFor="sand" className="form-label">Sand</label>
                   <input
                     type="number"
@@ -525,7 +525,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 </div> */}
 
                     {/* Crush */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                   <label htmlFor="crush" className="form-label">Crush</label>
                   <input
                     type="number"
@@ -553,7 +553,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 </div> */}
 
                     {/* Drawing/Dining */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="drawingDining" className="form-label">Drawing/Dining</label>
                       <select
                         className="form-select"
@@ -568,7 +568,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Garage */}
-                    <div className="col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6  mb-3">
                       <label htmlFor="garage" className="form-label">Garage</label>
                       <select
                         className="form-select"
@@ -583,7 +583,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Style */}
-                    {/* <div className="col-md-6 mb-3">
+                    {/* <div className="col-lg-4 col-md-6  mb-3">
                     <label htmlFor="style" className="form-label">Style</label>
                     <select
                       className="form-select"

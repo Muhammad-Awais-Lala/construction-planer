@@ -91,9 +91,9 @@ const EstimateResult = ({ result, onConfirm }) => {
                         <tr key={material}>
                           <td className="fw-semibold">{material}</td>
                           <td className="text-end">{formatNumber(quantity)}</td>
-                          <td>
+                          <td className='text-nowrap' style={{width:""}}>
                             <select
-                              className="form-select"
+                              className="form-select form-select-sm"
                               value={
                                 options.find(
                                   (item) => item.price === selectedPrice

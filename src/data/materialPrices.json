@@ -63,5 +63,15 @@
     {"name": "Crush-Margalla Bajri Mix (8 Sooter- 16 Sooter 50-80mm)", "price": 103.0},
     {"name": "Crush-Mix Bajar (Kaccha)", "price": 90.0},
     {"name": "Crush-Stone Dust (Khaka 0-0.5mm)", "price": 80.0}
+  ],
+  "Paint": [
+    {"name": "Standerd", "price": 60.0}
+  ],
+  "Plumbing_PVC": [
+    {"name": "PVC Pipes and Fittings", "price": 150.0}
+  ],
+  "Electrical_wiring": [
+    {"name": "Electrical Wires and Fittings", "price": 100.0}
   ]
+
 }
