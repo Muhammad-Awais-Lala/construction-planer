@@ -22,6 +22,7 @@ const steps = [
 const ConstructionSteps = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [estimateData, setEstimateData] = useState(null);
+  const [materialsConfirmed, setMaterialsConfirmed] = useState(false);
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -29,6 +30,9 @@ const ConstructionSteps = () => {
     if (savedData) {
       setEstimateData(JSON.parse(savedData));
     }
+    // Load materials confirmation state
+    const confirmed = localStorage.getItem('constructionMaterialsConfirmed') === 'true';
+    setMaterialsConfirmed(confirmed);
   }, []);
 
   const handleEstimateComplete = (data) => {
@@ -39,6 +43,9 @@ const ConstructionSteps = () => {
   };
 
   const handleNext = () => {
+      if (activeStep === 1 && !materialsConfirmed) {
+        return; // Don't allow proceeding if materials aren't confirmed
+      }
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -49,6 +56,7 @@ const ConstructionSteps = () => {
   const handleReset = () => {
     setActiveStep(0);
     setEstimateData(null);
+      setMaterialsConfirmed(false);
     // localStorage.removeItem('constructionEstimate');
     localStorage.clear();
   };
@@ -58,7 +66,14 @@ const ConstructionSteps = () => {
       case 0:
         return <EstimatePlanner onEstimateComplete={handleEstimateComplete} />;
       case 1:
-        return <EstimateResult result={estimateData?.result} onConfirm={handleNext} />;
+          return <EstimateResult 
+            result={estimateData?.result} 
+            onConfirm={() => {
+              setMaterialsConfirmed(true);
+              localStorage.setItem('constructionMaterialsConfirmed', 'true');
+              handleNext();
+            }} 
+          />;
       case 2:
         return <Report result={estimateData?.result} />;
       default:
@@ -92,7 +107,13 @@ const ConstructionSteps = () => {
         <Box>
           <button className="btn btn-outline-danger me-1" onClick={handleReset}>Reset  <i className="bi bi-arrow-counterclockwise ms-1"></i></button>
           {activeStep < steps.length - 1 && (
-            <button className="btn btn-primary" onClick={handleNext} disabled={!estimateData}>Next <i className="bi bi-arrow-right ms-1"></i></button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleNext} 
+                disabled={!estimateData || (activeStep === 1 && !materialsConfirmed)}
+              >
+                Next <i className="bi bi-arrow-right ms-1"></i>
+              </button>
           )}
         </Box>
       </Box>

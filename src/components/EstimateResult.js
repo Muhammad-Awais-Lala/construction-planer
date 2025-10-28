@@ -75,7 +75,7 @@ const EstimateResult = ({ result, onConfirm }) => {
                       <th><i className="bi bi-card-list me-1"></i>Material</th>
                       <th className="text-end"><i className="bi bi-basket me-1"></i>Quantity</th>
                       <th><i className="bi bi-award me-1"></i>Quality</th>
-                      <th className="text-end"><i className="bi bi-currency-rupee me-1"></i>Total Price (Rs.)</th>
+                      <th className="text-end">Total Price (Rs.)</th>
                     </tr>
                   </thead>
                   <tbody>

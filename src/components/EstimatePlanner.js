@@ -259,7 +259,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
           <div className="col-lg-10">
             <div className="card shadow-lg">
               <div className="card-header bg-primary text-white text-center">
-                <h2 className="mb-0"><i className="bi bi-house-fill me-2"></i>Construction Estimate Planner</h2>
+                <h2 className="mb-0"><i className="bi bi-house-gear me-2"></i>Construction Estimate Planner</h2>
               </div>
               <div className="card-body p-4">
                 <form onSubmit={handleSubmit}>
