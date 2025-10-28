@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import EstimateResult from './EstimateResult';
 
@@ -27,7 +27,24 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     sand: '',
     crush: ''
   }
-  const [formData, setFormData] = useState(initialFormData);
+  // Try to restore saved form data from localStorage so user can navigate steps and come back
+  const [formData, setFormData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('constructionForm');
+      return saved ? JSON.parse(saved) : initialFormData;
+    } catch (err) {
+      return initialFormData;
+    }
+  });
+
+  // Keep localStorage in sync if formData changes externally
+  useEffect(() => {
+    try {
+      localStorage.setItem('constructionForm', JSON.stringify(formData));
+    } catch (err) {
+      // ignore
+    }
+  }, [formData]);
 
   // Map of marla standards -> area (marla) -> width/length
   const MARLA_STANDARDS = {
@@ -74,13 +91,19 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
             next.overallWidth = '';
           }
         }
+        try {
+          localStorage.setItem('constructionForm', JSON.stringify(next));
+        } catch (err) {}
         return next;
       });
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+      setFormData(prev => {
+        const next = { ...prev, [name]: value };
+        try {
+          localStorage.setItem('constructionForm', JSON.stringify(next));
+        } catch (err) {}
+        return next;
+      });
     }
 
     // Clear error when user starts typing
@@ -130,7 +153,13 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         }
       }
 
-      setFormData(prev => ({ ...prev, numberOfBedrooms: derivedRooms, numberOfBathrooms: derivedRooms, areaValue: value, overallLength, overallWidth }));
+      setFormData(prev => {
+        const next = { ...prev, numberOfBedrooms: derivedRooms, numberOfBathrooms: derivedRooms, areaValue: value, overallLength, overallWidth };
+        try {
+          localStorage.setItem('constructionForm', JSON.stringify(next));
+        } catch (err) {}
+        return next;
+      });
     }
 
   const validateForm = () => {
@@ -171,28 +200,12 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     if (!validateForm()) {
       return;
     }
-
+    // localStorage.clear();
     setLoading(true);
     setResponse(null);
 
     try {
-      // const payload = {
-      //   area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
-      //   unit: formData.unit,
-      //   marla_standard: formData.marlaStandard,
-      //   quality: formData.quality,
-      //   city: formData.city,
-      //   overall_length: formData.overallLength,
-      //   overall_width: formData.overallWidth,
-      //   bedrooms: formData.numberOfBedrooms ,
-      //   bathrooms: formData.numberOfBathrooms ,
-      //   living_rooms: formData.numberOfLivingRooms ,
-      //   drawing_dining: formData.drawingDining,
-      //   garage: formData.garage,
-      //   floors: formData.numberOfFloors,
-      //   extra_features: formData.extraFeatures,
-      //   style: formData.style
-      // };
+    
       const payload = {
         area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
         unit: formData.unit,
@@ -233,14 +246,10 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       window.toastify('Failed to generate estimate', 'error');
     } finally {
       setLoading(false);
-      setFormData(initialFormData);
+      // do NOT clear the form here so user can go back and edit values; Reset should explicitly clear saved form
     }
   };
 
-  // If we have a successful response with data, show the result component
-  if (response && response.success && response.data) {
-    return <EstimateResult result={response.data.result} />;
-  }
 
   return (
     <div className="py-5">
@@ -249,14 +258,14 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
           <div className="col-lg-10">
             <div className="card shadow-lg">
               <div className="card-header bg-primary text-white text-center">
-                <h2 className="mb-0">Construction Estimate Planner</h2>
+                <h2 className="mb-0"><i className="bi bi-house-fill me-2"></i>Construction Estimate Planner</h2>
               </div>
               <div className="card-body p-4">
                 <form onSubmit={handleSubmit}>
                   <div className="row">
                     {/* Area Value */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="areaValue" className="form-label">Area Value *</label>
+                      <label htmlFor="areaValue" className="form-label">Area Value <span className="text-danger fw-bolder">*</span></label>
 
                       <input
                         type="number"
@@ -308,7 +317,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Overall Length */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="overallLength" className="form-label">Overall Length *</label>
+                      <label htmlFor="overallLength" className="form-label">Overall Length <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.overallLength ? 'is-invalid' : ''}`}
@@ -323,7 +332,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Overall Width */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="overallWidth" className="form-label">Overall Width *</label>
+                      <label htmlFor="overallWidth" className="form-label">Overall Width <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.overallWidth ? 'is-invalid' : ''}`}
@@ -375,7 +384,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Floors */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfFloors" className="form-label">Number of Floors *</label>
+                      <label htmlFor="numberOfFloors" className="form-label">Number of Floors <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfFloors ? 'is-invalid' : ''}`}
@@ -392,7 +401,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Bedrooms */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfBedrooms" className="form-label">Number of Bedrooms *</label>
+                      <label htmlFor="numberOfBedrooms" className="form-label">Number of Bedrooms <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfBedrooms ? 'is-invalid' : ''}`}
@@ -407,7 +416,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Bathrooms */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfBathrooms" className="form-label">Number of Bathrooms *</label>
+                      <label htmlFor="numberOfBathrooms" className="form-label">Number of Bathrooms <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfBathrooms ? 'is-invalid' : ''}`}
@@ -422,7 +431,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Kitchens */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfKitchens" className="form-label">Number of Kitchens *</label>
+                      <label htmlFor="numberOfKitchens" className="form-label">Number of Kitchens <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfKitchens ? 'is-invalid' : ''}`}
@@ -439,7 +448,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Living Rooms */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfLivingRooms" className="form-label">Number of Living Rooms *</label>
+                      <label htmlFor="numberOfLivingRooms" className="form-label">Number of Living Rooms <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfLivingRooms ? 'is-invalid' : ''}`}
@@ -614,7 +623,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                             Getting Estimate...
                           </>
                         ) : (
-                          'Get Estimate'
+                          <><i className="bi bi-calculator me-2"></i>Get Estimate</>
                         )}
                       </button>
                     </div>

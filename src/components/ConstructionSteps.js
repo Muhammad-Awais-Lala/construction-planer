@@ -95,7 +95,7 @@ const ConstructionSteps = () => {
         >
           Back
         </Button> */}
-        <button className="btn btn-outline-primary" onClick={handleBack} disabled={activeStep === 0}>&lt;-- Back</button>
+        <button className="btn btn-outline-primary" onClick={handleBack} disabled={activeStep === 0}><i className="bi bi-arrow-left me-1"></i> Back</button>
         <Box>
           {/* <Button
             variant="outlined"
@@ -104,7 +104,7 @@ const ConstructionSteps = () => {
           >
             Reset
           </Button> */}
-          <button className="btn btn-outline-danger me-1" onClick={handleReset}>Reset</button>
+          <button className="btn btn-outline-danger me-1" onClick={handleReset}>Reset  <i className="bi bi-arrow-counterclockwise ms-1"></i></button>
           {activeStep < steps.length - 1 && (
             // <Button
             //   variant="contained"
@@ -113,7 +113,7 @@ const ConstructionSteps = () => {
             // >
             //   Next
             // </Button>
-            <button className="btn btn-primary" onClick={handleNext} disabled={!estimateData}>Next --&gt;</button>
+            <button className="btn btn-primary" onClick={handleNext} disabled={!estimateData}>Next <i className="bi bi-arrow-right ms-1"></i></button>
           )}
         </Box>
       </Box>

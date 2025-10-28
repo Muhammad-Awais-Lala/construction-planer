@@ -64,18 +64,18 @@ const EstimateResult = ({ result, onConfirm }) => {
         <div className="col mb-4">
           <div className="card shadow">
             <div className="card-header bg-primary text-white">
-              <h3 className="card-title mb-0">Required Materials</h3>
+              <h3 className="card-title mb-0"><i className="bi bi-box-seam me-2"></i>Required Materials</h3>
             </div>
 
             <div className="card-body">
               <div className="table-responsive">
                 <table className="table table-hover align-middle">
-                  <thead className="table-light">
+                    <thead className="table-light">
                     <tr>
-                      <th>Material</th>
-                      <th className="text-end">Quantity</th>
-                      <th>Quality</th>
-                      <th className="text-end">Total Price (Rs.)</th>
+                      <th><i className="bi bi-card-list me-1"></i>Material</th>
+                      <th className="text-end"><i className="bi bi-basket me-1"></i>Quantity</th>
+                      <th><i className="bi bi-award me-1"></i>Quality</th>
+                      <th className="text-end"><i className="bi bi-currency-rupee me-1"></i>Total Price (Rs.)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -121,8 +121,8 @@ const EstimateResult = ({ result, onConfirm }) => {
 
                 {/* Optional total display */}
                 
-                  <div className="text-end mt-3">
-                    <h5 className="fw-bold">
+                    <div className="text-end mt-3">
+                    <h5 className="fw-bold"><i className="bi bi-calculator me-2"></i>
                       {/* Total Estimated Cost: Rs. {formatNumber(materials['Materials Cost (PKR)'])} */}
                     Total Estimated Material Cost: Rs. {formatNumber(Math.round(Object.entries(materials).reduce((sum, [material, quantity]) => {
                         if (material === 'Materials Cost (PKR)' || !materialsData[material]) return sum;
@@ -130,11 +130,8 @@ const EstimateResult = ({ result, onConfirm }) => {
                     }, 0)))}
 
                     </h5>
-                  </div>
-                  
-                  <div className="d-flex justify-content-end mt-3">
-                    <button className="btn btn-success" onClick={handleConfirm}>
-                      Confirm Materials
+                  </div>                  <div className="d-flex justify-content-end mt-3">
+                    <button className="btn btn-success" onClick={handleConfirm}><i className="bi bi-check-lg me-1"></i> Confirm Materials
                     </button>
                   </div>
             
