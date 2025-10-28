@@ -62,18 +62,24 @@ const Report = ({ result }) => {
                     <div className="row">
                         {/* Plan Details */}
                         <div className="col-12 mb-4">
-                            <h4>Building Plan Details</h4>
-                            <div className="table-responsive">
-                                <table className="table table-bordered table-sm">
-                                    <tbody>
-                                        {Object.entries(plan).map(([key, value]) => (
-                                            <tr key={key}>
-                                                <th style={{ width: '30%' }}>{key}</th>
-                                                <td>{Array.isArray(value) ? value.join(', ') : value}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div className="card shadow p-2">
+                                <div className="card-header bg-light">
+                                    <h4 className="mb-0"><i className="bi bi-layout-text-sidebar me-2"></i>Building Plan Details</h4>
+                                </div>
+                                <div className="card-body">
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm align-middle">
+                                            <tbody>
+                                                {Object.entries(plan).map(([key, value]) => (
+                                                    <tr key={key}>
+                                                        <th style={{ width: '30%' }} className="bg-light text-primary">{key}</th>
+                                                        <td>{Array.isArray(value) ? value.join(', ') : value}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
