@@ -88,31 +88,10 @@ const ConstructionSteps = () => {
       </div>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        {/* <Button
-          variant="outlined"
-          disabled={activeStep === 0}
-          onClick={handleBack}
-        >
-          Back
-        </Button> */}
         <button className="btn btn-outline-primary" onClick={handleBack} disabled={activeStep === 0}><i className="bi bi-arrow-left me-1"></i> Back</button>
         <Box>
-          {/* <Button
-            variant="outlined"
-            onClick={handleReset}
-            sx={{ mr: 1 }}
-          >
-            Reset
-          </Button> */}
           <button className="btn btn-outline-danger me-1" onClick={handleReset}>Reset  <i className="bi bi-arrow-counterclockwise ms-1"></i></button>
           {activeStep < steps.length - 1 && (
-            // <Button
-            //   variant="contained"
-            //   onClick={handleNext}
-            //   disabled={!estimateData}
-            // >
-            //   Next
-            // </Button>
             <button className="btn btn-primary" onClick={handleNext} disabled={!estimateData}>Next <i className="bi bi-arrow-right ms-1"></i></button>
           )}
         </Box>

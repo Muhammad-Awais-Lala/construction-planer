@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './scss/_bootstrap.scss';
-// Bootstrap Icons (installed via npm: bootstrap-icons)
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import "./config/Global";
 import './index.css';
 import App from './App';

@@ -233,7 +233,8 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       });
       console.log('Response:', responseData);
       window.toastify('Estimate generated successfully', 'success');
-      
+      localStorage.removeItem("constructionMaterials")
+      localStorage.removeItem("constructionTotalMaterialsCost")
       // Call the onEstimateComplete callback with the response data
       if (onEstimateComplete) {
         onEstimateComplete(responseData);

@@ -95,7 +95,7 @@ const Report = ({ result }) => {
                                     <tbody>
                                         {(() => {
                                             try {
-                                                const materialsData = JSON.parse(localStorage.getItem('constructionMaterials') || '[]');
+                                                const materialsData = JSON.parse(localStorage.getItem('constructionMaterials'));
                                                 // const totalMaterialsCost = parseFloat(localStorage.getItem('constructionTotalMaterialsCost') || '0');
 
                                                 return (
@@ -119,7 +119,7 @@ const Report = ({ result }) => {
                                                 return (
                                                     <tr>
                                                         <td colSpan="4" className="text-center text-muted">
-                                                            No materials data available
+                                                            Please select materials Quality in previous step.
                                                         </td>
                                                     </tr>
                                                 );
