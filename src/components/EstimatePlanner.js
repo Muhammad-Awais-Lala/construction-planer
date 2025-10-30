@@ -11,7 +11,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     overallWidth: '',
     city: 'Faisalabad',
     quality: 'Standard',
-    numberOfFloors: '1',
+    numberOfFloors: '',
     numberOfBedrooms: '',
     numberOfBathrooms: '',
     numberOfKitchens: '1',
@@ -392,10 +392,12 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                         id="numberOfFloors"
                         name="numberOfFloors"
                         // value={formData.numberOfFloors}
-                        onChange={handleInputChange}
                         placeholder="Enter number of floors"
-                        value={1}
-                        disabled={true}
+                        onChange={handleInputChange}
+                        value={formData.numberOfFloors}
+                        min={1}
+                        max={3}
+                        // disabled={true}
                       />
                       {errors.numberOfFloors && <div className="invalid-feedback">{errors.numberOfFloors}</div>}
                     </div>
