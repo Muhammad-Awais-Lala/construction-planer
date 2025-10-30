@@ -5,7 +5,7 @@ const EstimateResult = ({ result, onConfirm }) => {
     
     const { materials, cost } = result;
 
-    console.log('Materials:', materials);
+    // console.log('Materials:', materials);
     // Initialize selected prices dynamically for each material type
     const initialPrices = Object.keys(materials)
     .filter((key) => materialsData[key]) // only include materials available in data

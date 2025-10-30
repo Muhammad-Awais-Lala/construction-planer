@@ -3,13 +3,27 @@ import React from 'react';
 const Report = ({ result }) => {
     if (!result) return null;
 
-    const { cost, materials, designs, plan } = result;
+    const { cost, finishing, designs, plan } = result;
     const totalMaterialsCost = parseFloat(localStorage.getItem('constructionTotalMaterialsCost') || '0');
     const labourCost = cost?.labour_cost || 0;
     const grayStructureCost = totalMaterialsCost + labourCost;
     const totalCost = grayStructureCost + (cost?.finishing_cost || 0);
 
-    //   console.log('Report result:', result);
+    // Helper function to get appropriate icon for each category
+    const getCategoryIcon = (category) => {
+        const iconMap = {
+            'Flooring': 'grid-3x3-gap',
+            'Paint': 'brush',
+            'Kitchen': 'house-door',
+            'Windows': 'window',
+            'Doors': 'door-closed',
+            'Electrical Fittings': 'lightning-charge',
+            'Bath Fittings': 'water'
+        };
+        return iconMap[category] || 'square';
+    };
+
+    console.log('finishing.material_guide:', finishing?.material_guide);
 
     return (
         <div className="container py-5">
@@ -185,6 +199,41 @@ const Report = ({ result }) => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Finishing Materials Guide */}
+                        {finishing?.material_guide && (
+                            <div className="col-12 mb-4">
+                                <div className="card shadow p-2">
+                                    <div className="card-header bg-light">
+                                        <h4 className="mb-0">
+                                            <i className="bi bi-tools me-2"></i>
+                                            Finishing Materials Guide
+                                        </h4>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="row g-4">
+                                            {finishing.material_guide.map((item, index) => (
+                                                <div key={index} className="col-md-6 col-lg-4">
+                                                    <div className="card h-100 border-0 shadow-sm">
+                                                        <div className="card-body">
+                                                            <div className="d-flex align-items-center mb-3">
+                                                                <i className={`bi bi-${getCategoryIcon(item.category)} fs-4 text-primary me-2`}></i>
+                                                                <h5 className="card-title mb-0 text-primary">{item.category}</h5>
+                                                            </div>
+                                                            <h6 className="text-muted mb-2">{item.material_type}</h6>
+                                                            <p className="card-text small">
+                                                                <i className="bi bi-info-circle me-2 text-info"></i>
+                                                                {item.notes}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Recommendations Section */}
                         {/* <div className="col-12">

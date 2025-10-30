@@ -224,7 +224,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         style: formData.style
         // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
       };
-
+      console.log('Payload:', payload);
       const response = await axiosClient.post('/estimate', payload);
       const responseData = response.data;
       setResponse({
