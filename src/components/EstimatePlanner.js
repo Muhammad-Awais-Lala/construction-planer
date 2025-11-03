@@ -25,7 +25,8 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     cement: '',
     steel: '',
     sand: '',
-    crush: ''
+    crush: '',
+    extraFloorDetails: []
   }
   // Try to restore saved form data from localStorage so user can navigate steps and come back
   const [formData, setFormData] = useState(() => {
@@ -91,6 +92,25 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
             next.overallWidth = '';
           }
         }
+        try {
+          localStorage.setItem('constructionForm', JSON.stringify(next));
+        } catch (err) {}
+        return next;
+      });
+    } else if (name === 'numberOfFloors') {
+      setFormData(prev => {
+        const parsed = parseInt(value || 0, 10);
+        const floorsNum = Math.min(3, Math.max(1, isNaN(parsed) ? 0 : parsed));
+        const next = { ...prev, [name]: floorsNum };
+        const extraCount = Math.max(0, floorsNum - 1);
+        const current = Array.isArray(prev.extraFloorDetails) ? prev.extraFloorDetails : [];
+        let adjusted = current.slice(0, extraCount);
+        if (adjusted.length < extraCount) {
+          adjusted = adjusted.concat(
+            Array.from({ length: extraCount - adjusted.length }, () => ({ bedrooms: '', bathrooms: '' }))
+          );
+        }
+        next.extraFloorDetails = adjusted;
         try {
           localStorage.setItem('constructionForm', JSON.stringify(next));
         } catch (err) {}
@@ -194,6 +214,19 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleExtraFloorChange = (index, field, value) => {
+    setFormData(prev => {
+      const list = Array.isArray(prev.extraFloorDetails) ? [...prev.extraFloorDetails] : [];
+      if (!list[index]) list[index] = { bedrooms: '', bathrooms: '' };
+      list[index] = { ...list[index], [field]: value };
+      const next = { ...prev, extraFloorDetails: list };
+      try {
+        localStorage.setItem('constructionForm', JSON.stringify(next));
+      } catch (err) {}
+      return next;
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -206,6 +239,14 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
     try {
     
+      const baseBedrooms = parseFloat(formData.numberOfBedrooms || 0);
+      const baseBathrooms = parseFloat(formData.numberOfBathrooms || 0);
+      const extraTotals = (Array.isArray(formData.extraFloorDetails) ? formData.extraFloorDetails : []).reduce((acc, f) => {
+        const b = parseFloat(f?.bedrooms || 0);
+        const ba = parseFloat(f?.bathrooms || 0);
+        return { bedrooms: acc.bedrooms + (isNaN(b) ? 0 : b), bathrooms: acc.bathrooms + (isNaN(ba) ? 0 : ba) };
+      }, { bedrooms: 0, bathrooms: 0 });
+
       const payload = {
         area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
         unit: formData.unit,
@@ -214,8 +255,8 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         city: formData.city,
         overall_length: formData.overallLength ? parseFloat(formData.overallLength) : undefined,
         overall_width: formData.overallWidth ? parseFloat(formData.overallWidth) : undefined,
-        bedrooms: formData.numberOfBedrooms ? parseFloat(formData.numberOfBedrooms) : undefined,
-        bathrooms: formData.numberOfBathrooms ? parseFloat(formData.numberOfBathrooms) : undefined,
+        bedrooms: (isNaN(baseBedrooms) ? 0 : baseBedrooms) + extraTotals.bedrooms || undefined,
+        bathrooms: (isNaN(baseBathrooms) ? 0 : baseBathrooms) + extraTotals.bathrooms || undefined,
         living_rooms: formData.numberOfLivingRooms ? parseFloat(formData.numberOfLivingRooms) : undefined,
         drawing_dining: formData.drawingDining,
         garage: formData.garage,
@@ -404,7 +445,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Bedrooms */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfBedrooms" className="form-label">Number of Bedrooms <span className="text-danger fw-bolder">*</span></label>
+                      <label htmlFor="numberOfBedrooms" className="form-label">Number of Bedrooms (Floor 1)  <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfBedrooms ? 'is-invalid' : ''}`}
@@ -412,7 +453,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                         name="numberOfBedrooms"
                         value={formData.numberOfBedrooms}
                         onChange={handleInputChange}
-                        placeholder="Enter number of bedrooms"
+                        placeholder="Enter bedrooms for floor 1"
                       />
                       {errors.numberOfBedrooms && <div className="invalid-feedback">{errors.numberOfBedrooms}</div>}
                     </div>
@@ -431,6 +472,35 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                       />
                       {errors.numberOfBathrooms && <div className="invalid-feedback">{errors.numberOfBathrooms}</div>}
                     </div>
+
+                    {/* Extra floors: Bedrooms/Bathrooms per additional floor */}
+                    {Number(formData.numberOfFloors) > 1 && (Array.isArray(formData.extraFloorDetails) ? formData.extraFloorDetails : []).map((floor, idx) => {
+                      const floorNum = idx + 2;
+                      return (
+                        <React.Fragment key={`extra-floor-${floorNum}`}>
+                          <div className="col-lg-4 col-md-6  mb-3">
+                            <label className="form-label">Number of Bedrooms (Floor {floorNum})</label>
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={floor?.bedrooms ?? ''}
+                              onChange={(e) => handleExtraFloorChange(idx, 'bedrooms', e.target.value)}
+                              placeholder={`Enter bedrooms for floor ${floorNum}`}
+                            />
+                          </div>
+                          <div className="col-lg-4 col-md-6  mb-3">
+                            <label className="form-label">Number of Bathrooms (Floor {floorNum})</label>
+                            <input
+                              type="number"
+                              className="form-control"
+                              value={floor?.bathrooms ?? ''}
+                              onChange={(e) => handleExtraFloorChange(idx, 'bathrooms', e.target.value)}
+                              placeholder={`Enter bathrooms for floor ${floorNum}`}
+                            />
+                          </div>
+                        </React.Fragment>
+                      );
+                    })}
 
                     {/* Number of Kitchens */}
                     <div className="col-lg-4 col-md-6  mb-3">
