@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
-import EstimateResult from './EstimateResult';
 
 const EstimatePlanner = ({ onEstimateComplete }) => {
   const initialFormData = {
@@ -27,7 +26,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     sand: '',
     crush: ''
   }
-  // Try to restore saved form data from localStorage so user can navigate steps and come back
+
   const [formData, setFormData] = useState(() => {
     try {
       const saved = localStorage.getItem('constructionForm');
@@ -37,7 +36,17 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     }
   });
 
-  // Keep localStorage in sync if formData changes externally
+  const [floors, setFloors] = useState([{ 
+    floorNumber: 1, 
+    floorName: 'Ground Floor',
+    bedrooms: '', 
+    bathrooms: '', 
+    kitchens: '1', 
+    livingRooms: '1',
+    garage: 'Required',
+    drawingDining: 'Required'
+  }]);
+
   useEffect(() => {
     try {
       localStorage.setItem('constructionForm', JSON.stringify(formData));
@@ -46,7 +55,36 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     }
   }, [formData]);
 
-  // Map of marla standards -> area (marla) -> width/length
+  // Load floors from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedFloors = localStorage.getItem('constructionFloors');
+      if (savedFloors) {
+        setFloors(JSON.parse(savedFloors));
+      }
+    } catch (err) {
+      // ignore
+    }
+  }, []);
+
+  // Save floors to localStorage whenever floors change
+  useEffect(() => {
+    try {
+      localStorage.setItem('constructionFloors', JSON.stringify(floors));
+    } catch (err) {
+      // ignore
+    }
+  }, [floors]);
+
+  // Function to get floor name based on floor number
+  const getFloorName = (floorNumber) => {
+    if (floorNumber === 1) return 'Ground Floor';
+    if (floorNumber === 2) return '1st Floor';
+    if (floorNumber === 3) return '2nd Floor';
+    if (floorNumber === 4) return '3rd Floor';
+    return `${floorNumber}th Floor`;
+  };
+
   const MARLA_STANDARDS = {
     "225 (Govt)": {
       3: { width: 18, length: 37 },
@@ -70,13 +108,12 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     }
   };
 
-  const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // If marlaStandard changed, compute overall dimensions for current area
+    
     if (name === 'marlaStandard') {
       setFormData(prev => {
         const next = { ...prev, [name]: value };
@@ -106,7 +143,6 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       });
     }
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -115,52 +151,108 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     }
   };
 
-  
-    const handleAreaChange = (e) => {
-      let value = e.target.value;
-      // Convert to number
-      const area = Number(value);
+  const handleAreaChange = (e) => {
+    let value = e.target.value;
+    const area = Number(value);
 
-      // Limit within range
-      if (area < 3) value = 3;
-      if (area > 10) value = 10;
-      if (area === 0 || isNaN(area)) {
-        value = "";
-      }
-      // console.log('Derived Area:', area);
-      // console.log('Input Value:', value);
-
-      let derivedRooms;
-      if (area === 3) {
-        derivedRooms = 1;
-      } else if (area >= 4 && area <= 7) {
-        derivedRooms = 2;
-      } else if (area >= 8 && area <= 10) {
-        derivedRooms = 3;
-      } else {
-        derivedRooms = 1; // fallback for area 3
-      }
-
-      // Compute overall dimensions for current marla standard (if possible)
-      const selectedStandard = formData.marlaStandard || '272.25 (Lahore/old)';
-      let overallLength = '';
-      let overallWidth = '';
-      if (!isNaN(area) && area >= 3 && area <= 10) {
-        const dims = MARLA_STANDARDS[selectedStandard]?.[area];
-        if (dims) {
-          overallLength = dims.length;
-          overallWidth = dims.width;
-        }
-      }
-
-      setFormData(prev => {
-        const next = { ...prev, numberOfBedrooms: derivedRooms, numberOfBathrooms: derivedRooms, areaValue: value, overallLength, overallWidth };
-        try {
-          localStorage.setItem('constructionForm', JSON.stringify(next));
-        } catch (err) {}
-        return next;
-      });
+    if (area < 3) value = 3;
+    if (area > 10) value = 10;
+    if (area === 0 || isNaN(area)) {
+      value = "";
     }
+
+    let derivedRooms;
+    if (area === 3) {
+      derivedRooms = 1;
+    } else if (area >= 4 && area <= 7) {
+      derivedRooms = 2;
+    } else if (area >= 8 && area <= 10) {
+      derivedRooms = 3;
+    } else {
+      derivedRooms = 1;
+    }
+
+    const selectedStandard = formData.marlaStandard || '272.25 (Lahore/old)';
+    let overallLength = '';
+    let overallWidth = '';
+    if (!isNaN(area) && area >= 3 && area <= 10) {
+      const dims = MARLA_STANDARDS[selectedStandard]?.[area];
+      if (dims) {
+        overallLength = dims.length;
+        overallWidth = dims.width;
+      }
+    }
+
+    setFormData(prev => {
+      const next = { ...prev, numberOfBedrooms: derivedRooms, numberOfBathrooms: derivedRooms, areaValue: value, overallLength, overallWidth };
+      try {
+        localStorage.setItem('constructionForm', JSON.stringify(next));
+      } catch (err) {}
+      return next;
+    });
+
+    // Update bedrooms and bathrooms for all floors when area changes
+    setFloors(prevFloors => 
+      prevFloors.map(floor => ({
+        ...floor,
+        bedrooms: derivedRooms,
+        bathrooms: derivedRooms
+      }))
+    );
+  }
+
+  const handleFloorChange = (index, field, value) => {
+    setFloors(prevFloors => 
+      prevFloors.map((floor, i) => 
+        i === index ? { ...floor, [field]: value } : floor
+      )
+    );
+  };
+
+  const addFloor = () => {
+    const currentFloorsCount = floors.length;
+    if (currentFloorsCount >= 3) return; // Maximum 3 floors allowed
+    
+    const newFloor = { 
+      floorNumber: currentFloorsCount + 1, 
+      floorName: getFloorName(currentFloorsCount + 1),
+      bedrooms: formData.numberOfBedrooms || '', 
+      bathrooms: formData.numberOfBathrooms || '', 
+      kitchens: '1', 
+      livingRooms: '1',
+      drawingDining: 'Required'
+    };
+    
+    setFloors(prev => [...prev, newFloor]);
+    
+    // Update total floors count in formData
+    setFormData(prev => ({
+      ...prev, 
+      numberOfFloors: currentFloorsCount + 1
+    }));
+  };
+
+  const removeFloor = (index) => {
+    if (floors.length <= 1) return; // At least one floor should remain
+    
+    setFloors(prevFloors => prevFloors.filter((_, i) => i !== index));
+    
+    // Update floor numbers and total floors count
+    const updatedFloors = floors.filter((_, i) => i !== index)
+      .map((floor, i) => ({ 
+        ...floor, 
+        floorNumber: i + 1,
+        floorName: getFloorName(i + 1)
+      }));
+    
+    setFloors(updatedFloors);
+    
+    // Update total floors count in formData
+    setFormData(prev => ({
+      ...prev, 
+      numberOfFloors: updatedFloors.length
+    }));
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -177,18 +269,16 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     if (!formData.numberOfFloors || formData.numberOfFloors <= 0) {
       newErrors.numberOfFloors = 'Number of floors is required and must be greater than 0';
     }
-    if (!formData.numberOfBedrooms || formData.numberOfBedrooms <= 0) {
-      newErrors.numberOfBedrooms = 'Number of bedrooms is required and must be greater than 0';
-    }
-    if (!formData.numberOfBathrooms || formData.numberOfBathrooms <= 0) {
-      newErrors.numberOfBathrooms = 'Number of bathrooms is required and must be greater than 0';
-    }
-    if (!formData.numberOfKitchens || formData.numberOfKitchens <= 0) {
-      newErrors.numberOfKitchens = 'Number of kitchens is required and must be greater than 0';
-    }
-    if (!formData.numberOfLivingRooms || formData.numberOfLivingRooms <= 0) {
-      newErrors.numberOfLivingRooms = 'Number of living rooms is required and must be greater than 0';
-    }
+
+    // Validate each floor
+    floors.forEach((floor, index) => {
+      if (!floor.bedrooms || floor.bedrooms <= 0) {
+        newErrors[`floor_${index}_bedrooms`] = `Bedrooms for ${floor.floorName} are required`;
+      }
+      if (!floor.bathrooms || floor.bathrooms <= 0) {
+        newErrors[`floor_${index}_bathrooms`] = `Bathrooms for ${floor.floorName} are required`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -200,12 +290,15 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     if (!validateForm()) {
       return;
     }
-    // localStorage.clear();
+
     setLoading(true);
-    setResponse(null);
 
     try {
-    
+      // Calculate totals from all floors
+      const totalBedrooms = floors.reduce((sum, floor) => sum + parseInt(floor.bedrooms || 0), 0);
+      const totalBathrooms = floors.reduce((sum, floor) => sum + parseInt(floor.bathrooms || 0), 0);
+      const totalLivingRooms = floors.reduce((sum, floor) => sum + parseInt(floor.livingRooms || 0), 0);
+
       const payload = {
         area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
         unit: formData.unit,
@@ -214,43 +307,37 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         city: formData.city,
         overall_length: formData.overallLength ? parseFloat(formData.overallLength) : undefined,
         overall_width: formData.overallWidth ? parseFloat(formData.overallWidth) : undefined,
-        bedrooms: formData.numberOfBedrooms ? parseFloat(formData.numberOfBedrooms) : undefined,
-        bathrooms: formData.numberOfBathrooms ? parseFloat(formData.numberOfBathrooms) : undefined,
-        living_rooms: formData.numberOfLivingRooms ? parseFloat(formData.numberOfLivingRooms) : undefined,
-        drawing_dining: formData.drawingDining,
-        garage: formData.garage,
+        bedrooms: totalBedrooms,
+        bathrooms: totalBathrooms,
+        living_rooms: totalLivingRooms,
+        drawing_dining: floors[0]?.drawingDining || 'Required',
+        garage: floors[0]?.garage || 'Required',
         floors: formData.numberOfFloors ? parseFloat(formData.numberOfFloors) : undefined,
         extra_features: formData.extraFeatures,
-        style: formData.style
-        // If you want to send kitchenSize, bricks, cement, steel, sand, crush, add similar checks
+        style: formData.style,
+        floors_detail: floors.map(floor => ({
+          ...floor,
+          floorName: getFloorName(floor.floorNumber)
+        }))
       };
+      
       console.log('Payload:', payload);
       const response = await axiosClient.post('/estimate', payload);
       const responseData = response.data;
-      setResponse({
-        success: true,
-        data: responseData
-      });
       console.log('Response:', responseData);
       window.toastify('Estimate generated successfully', 'success');
       localStorage.removeItem("constructionMaterials")
       localStorage.removeItem("constructionTotalMaterialsCost")
-      // Call the onEstimateComplete callback with the response data
+      
       if (onEstimateComplete) {
         onEstimateComplete(responseData);
       }
     } catch (error) {
-      setResponse({
-        success: false,
-        error: error.response?.data?.message || 'An error occurred while getting the estimate'
-      });
       window.toastify('Failed to generate estimate', 'error');
     } finally {
       setLoading(false);
-      // do NOT clear the form here so user can go back and edit values; Reset should explicitly clear saved form
     }
   };
-
 
   return (
     <div className="py-5">
@@ -265,9 +352,8 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                 <form onSubmit={handleSubmit}>
                   <div className="row">
                     {/* Area Value */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="areaValue" className="form-label">Area Value <span className="text-danger fw-bolder">*</span></label>
-
                       <input
                         type="number"
                         className={`form-control ${errors.areaValue ? 'is-invalid' : ''}`}
@@ -278,15 +364,12 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                         placeholder="Enter area value"
                         min={3}
                         max={10}
-                      // defaultValue={3}
-
                       />
-
                       {errors.areaValue && <div className="invalid-feedback">{errors.areaValue}</div>}
                     </div>
 
                     {/* Unit */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="unit" className="form-label">Unit</label>
                       <select
                         className="form-select"
@@ -296,13 +379,11 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                         onChange={handleInputChange}
                       >
                         <option value="Marla">Marla</option>
-                        {/* <option value="Square Feet">Square Feet</option>
-                        <option value="Square Yards">Square Yards</option> */}
                       </select>
                     </div>
 
                     {/* Marla Standard */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="marlaStandard" className="form-label">Marla Standard</label>
                       <select
                         className="form-select"
@@ -317,7 +398,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Overall Length */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="overallLength" className="form-label">Overall Length <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
@@ -332,7 +413,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Overall Width */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="overallWidth" className="form-label">Overall Width <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
@@ -347,7 +428,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* City */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="city" className="form-label">City</label>
                       <select
                         className="form-select"
@@ -367,249 +448,143 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                       </select>
                     </div>
 
-                    {/* Quality */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                    <label htmlFor="quality" className="form-label">Quality</label>
-                    <select
-                      className="form-select"
-                      id="quality"
-                      name="quality"
-                      value={formData.quality}
-                      onChange={handleInputChange}
-                    >
-                      <option value="Standard">Standard</option>
-                      <option value="Premium">Premium</option>
-                      <option value="Luxury">Luxury</option>
-                    </select>
-                  </div> */}
-
-                    {/* Number of Floors */}
-                    <div className="col-lg-4 col-md-6  mb-3">
+                    {/* Number of Floors - Now auto-calculated */}
+                    <div className="col-lg-4 col-md-6 mb-3">
                       <label htmlFor="numberOfFloors" className="form-label">Number of Floors <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
                         className={`form-control ${errors.numberOfFloors ? 'is-invalid' : ''}`}
                         id="numberOfFloors"
                         name="numberOfFloors"
-                        // value={formData.numberOfFloors}
-                        placeholder="Enter number of floors"
-                        onChange={handleInputChange}
-                        value={formData.numberOfFloors}
+                        value={floors.length}
+                        readOnly
                         min={1}
                         max={3}
-                        // disabled={true}
                       />
                       {errors.numberOfFloors && <div className="invalid-feedback">{errors.numberOfFloors}</div>}
                     </div>
+                  </div>
 
-                    {/* Number of Bedrooms */}
-                    <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfBedrooms" className="form-label">Number of Bedrooms <span className="text-danger fw-bolder">*</span></label>
-                      <input
-                        type="number"
-                        className={`form-control ${errors.numberOfBedrooms ? 'is-invalid' : ''}`}
-                        id="numberOfBedrooms"
-                        name="numberOfBedrooms"
-                        value={formData.numberOfBedrooms}
-                        onChange={handleInputChange}
-                        placeholder="Enter number of bedrooms"
-                      />
-                      {errors.numberOfBedrooms && <div className="invalid-feedback">{errors.numberOfBedrooms}</div>}
+                  {/* Dynamic Floors Section */}
+                  <div className="mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5 className="mb-0">Floors Configuration</h5>
+                      {floors.length < 3 && (
+                        <button 
+                          type="button" 
+                          className="btn btn-success btn-sm"
+                          onClick={addFloor}
+                        >
+                          <i className="bi bi-plus-circle me-1"></i>Add Floor
+                        </button>
+                      )}
                     </div>
 
-                    {/* Number of Bathrooms */}
-                    <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfBathrooms" className="form-label">Number of Bathrooms <span className="text-danger fw-bolder">*</span></label>
-                      <input
-                        type="number"
-                        className={`form-control ${errors.numberOfBathrooms ? 'is-invalid' : ''}`}
-                        id="numberOfBathrooms"
-                        name="numberOfBathrooms"
-                        value={formData.numberOfBathrooms}
-                        onChange={handleInputChange}
-                        placeholder="Enter number of bathrooms"
-                      />
-                      {errors.numberOfBathrooms && <div className="invalid-feedback">{errors.numberOfBathrooms}</div>}
-                    </div>
+                    {floors.map((floor, index) => (
+                      <div key={index} className="card mb-3">
+                        <div className="card-header bg-light d-flex justify-content-between align-items-center">
+                          <h6 className="mb-0">{floor.floorName}</h6>
+                          {floors.length > 1 && (
+                            <button 
+                              type="button" 
+                              className="btn btn-danger btn-sm"
+                              onClick={() => removeFloor(index)}
+                            >
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          )}
+                        </div>
+                        <div className="card-body">
+                          <div className="row">
+                            {/* Bedrooms for this floor */}
+                            <div className="col-lg-3 col-md-6 mb-3">
+                              <label className="form-label">Bedrooms <span className="text-danger fw-bolder">*</span></label>
+                              <input
+                                type="number"
+                                className={`form-control ${errors[`floor_${index}_bedrooms`] ? 'is-invalid' : ''}`}
+                                value={floor.bedrooms}
+                                onChange={(e) => handleFloorChange(index, 'bedrooms', e.target.value)}
+                                placeholder="Bedrooms"
+                                min="1"
+                              />
+                              {errors[`floor_${index}_bedrooms`] && (
+                                <div className="invalid-feedback">{errors[`floor_${index}_bedrooms`]}</div>
+                              )}
+                            </div>
 
-                    {/* Number of Kitchens */}
-                    <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfKitchens" className="form-label">Number of Kitchens <span className="text-danger fw-bolder">*</span></label>
-                      <input
-                        type="number"
-                        className={`form-control ${errors.numberOfKitchens ? 'is-invalid' : ''}`}
-                        id="numberOfKitchens"
-                        name="numberOfKitchens"
-                        // value={formData.numberOfKitchens}
-                        onChange={handleInputChange}
-                        placeholder="Enter number of kitchens"
-                        value={1}
-                        disabled={true}
-                      />
-                      {errors.numberOfKitchens && <div className="invalid-feedback">{errors.numberOfKitchens}</div>}
-                    </div>
+                            {/* Bathrooms for this floor */}
+                            <div className="col-lg-3 col-md-6 mb-3">
+                              <label className="form-label">Bathrooms <span className="text-danger fw-bolder">*</span></label>
+                              <input
+                                type="number"
+                                className={`form-control ${errors[`floor_${index}_bathrooms`] ? 'is-invalid' : ''}`}
+                                value={floor.bathrooms}
+                                onChange={(e) => handleFloorChange(index, 'bathrooms', e.target.value)}
+                                placeholder="Bathrooms"
+                                min="1"
+                              />
+                              {errors[`floor_${index}_bathrooms`] && (
+                                <div className="invalid-feedback">{errors[`floor_${index}_bathrooms`]}</div>
+                              )}
+                            </div>
 
-                    {/* Number of Living Rooms */}
-                    <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="numberOfLivingRooms" className="form-label">Number of Living Rooms <span className="text-danger fw-bolder">*</span></label>
-                      <input
-                        type="number"
-                        className={`form-control ${errors.numberOfLivingRooms ? 'is-invalid' : ''}`}
-                        id="numberOfLivingRooms"
-                        name="numberOfLivingRooms"
-                        // value={formData.numberOfLivingRooms}
-                        onChange={handleInputChange}
-                        placeholder="Enter number of living rooms"
-                        value={1}
-                        disabled={true}
-                      />
-                      {errors.numberOfLivingRooms && <div className="invalid-feedback">{errors.numberOfLivingRooms}</div>}
-                    </div>
+                            {/* Kitchens for this floor */}
+                            <div className="col-lg-3 col-md-6 mb-3">
+                              <label className="form-label">Kitchens</label>
+                              <input
+                                type="number"
+                                className="form-control"
+                                value={floor.kitchens}
+                                onChange={(e) => handleFloorChange(index, 'kitchens', e.target.value)}
+                                placeholder="Kitchens"
+                                min="1"
+                              />
+                            </div>
 
-                    {/* Kitchen Size */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="kitchenSize" className="form-label">Kitchen Size</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        id="kitchenSize"
-                        name="kitchenSize"
-                        value={formData.kitchenSize}
-                        onChange={handleInputChange}
-                        placeholder="Enter kitchen size (sq ft)"
-                      />
-                    </div> */}
+                            {/* Living Rooms for this floor */}
+                            <div className="col-lg-3 col-md-6 mb-3">
+                              <label className="form-label">Living Rooms</label>
+                              <input
+                                type="number"
+                                className="form-control"
+                                value={floor.livingRooms}
+                                onChange={(e) => handleFloorChange(index, 'livingRooms', e.target.value)}
+                                placeholder="Living Rooms"
+                                min="1"
+                              />
+                            </div>
 
-                    {/* Bricks */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                  <label htmlFor="bricks" className="form-label">Bricks</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="bricks"
-                    name="bricks"
-                    value={formData.bricks}
-                    onChange={handleInputChange}
-                    placeholder="Enter bricks quantity"
-                  />
-                </div> */}
+                            {/* Drawing/Dining for this floor */}
+                            <div className="col-lg-4 col-md-6 mb-3">
+                              <label className="form-label">Drawing/Dining</label>
+                              <select
+                                className="form-select"
+                                value={floor.drawingDining}
+                                onChange={(e) => handleFloorChange(index, 'drawingDining', e.target.value)}
+                              >
+                                <option value="Required">Required</option>
+                                <option value="Not Required">Not Required</option>
+                              </select>
+                            </div>
 
-                    {/* Cement */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                  <label htmlFor="cement" className="form-label">Cement</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="cement"
-                    name="cement"
-                    value={formData.cement}
-                    onChange={handleInputChange}
-                    placeholder="Enter cement quantity (bags)"
-                  />
-                </div> */}
-
-                    {/* Steel */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                  <label htmlFor="steel" className="form-label">Steel</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="steel"
-                    name="steel"
-                    value={formData.steel}
-                    onChange={handleInputChange}
-                    placeholder="Enter steel quantity (kg/ton)"
-                  />
-                </div> */}
-
-                    {/* Sand */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                  <label htmlFor="sand" className="form-label">Sand</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="sand"
-                    name="sand"
-                    value={formData.sand}
-                    onChange={handleInputChange}
-                    placeholder="Enter sand quantity (cft)"
-                  />
-                </div> */}
-
-                    {/* Crush */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                  <label htmlFor="crush" className="form-label">Crush</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="crush"
-                    name="crush"
-                    value={formData.crush}
-                    onChange={handleInputChange}
-                    placeholder="Enter crush quantity (cft)"
-                  />
-                </div> */}
-
-                    {/* Extra Features */}
-                    {/* <div className="col-12 mb-3">
-                  <label htmlFor="extraFeatures" className="form-label">Extra Features</label>
-                  <textarea
-                    className="form-control"
-                    id="extraFeatures"
-                    name="extraFeatures"
-                    rows="3"
-                    value={formData.extraFeatures}
-                    onChange={handleInputChange}
-                    placeholder="Describe any extra features (e.g., basement, rooftop, lawn)"
-                  />
-                </div> */}
-
-                    {/* Drawing/Dining */}
-                    <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="drawingDining" className="form-label">Drawing/Dining</label>
-                      <select
-                        className="form-select"
-                        id="drawingDining"
-                        name="drawingDining"
-                        value={formData.drawingDining}
-                        onChange={handleInputChange}
-                      >
-                        <option value="Required">Required</option>
-                        {/* <option value="Not Required">Not Required</option> */}
-                      </select>
-                    </div>
-
-                    {/* Garage */}
-                    <div className="col-lg-4 col-md-6  mb-3">
-                      <label htmlFor="garage" className="form-label">Garage</label>
-                      <select
-                        className="form-select"
-                        id="garage"
-                        name="garage"
-                        value={formData.garage}
-                        onChange={handleInputChange}
-                      >
-                        <option value="Required">Required</option>
-                        {/* <option value="Not Required">Not Required</option> */}
-                      </select>
-                    </div>
-
-                    {/* Style */}
-                    {/* <div className="col-lg-4 col-md-6  mb-3">
-                    <label htmlFor="style" className="form-label">Style</label>
-                    <select
-                      className="form-select"
-                      id="style"
-                      name="style"
-                      value={formData.style}
-                      onChange={handleInputChange}
-                    >
-                      <option value="Pakistani">Pakistani</option>
-                      <option value="Modern">Modern</option>
-                      <option value="Spanish">Spanish</option>
-                      <option value="Luxury">Luxury</option>
-                    </select>
-                  </div> */}
+                            {/* Garage - Only for Ground Floor */}
+                            {index === 0 && (
+                              <div className="col-lg-4 col-md-6 mb-3">
+                                <label className="form-label">Garage</label>
+                                <select
+                                  className="form-select"
+                                  value={floor.garage}
+                                  onChange={(e) => handleFloorChange(index, 'garage', e.target.value)}
+                                >
+                                  <option value="Required">Required</option>
+                                  <option value="Not Required">Not Required</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   {/* Submit Button */}
@@ -632,23 +607,6 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
                   </div>
                 </form>
-
-                {/* Response Display */}
-                {/* {response && (
-                  <div className="mt-4">
-                    {response.success ? (
-                      <div className="alert alert-success" role="alert">
-                        <h5 className="alert-heading">Estimate Generated Successfully!</h5>
-                        <pre className="mb-0">{JSON.stringify(response.data, null, 2)}</pre>
-                      </div>
-                    ) : (
-                      <div className="alert alert-danger" role="alert">
-                        <h5 className="alert-heading">Error</h5>
-                        <p className="mb-0">{response.error}</p>
-                      </div>
-                    )}
-                  </div>
-                )} */}
               </div>
             </div>
           </div>
