@@ -116,8 +116,38 @@ const Report = ({ result }) => {
                                         {(() => {
                                             try {
                                                 const materialsData = JSON.parse(localStorage.getItem('constructionMaterials'));
-                                                // const totalMaterialsCost = parseFloat(localStorage.getItem('constructionTotalMaterialsCost') || '0');
+                                                const hasFloors = Array.isArray(materialsData) && materialsData.some(it => typeof it.floor !== 'undefined');
+                                                if (hasFloors) {
+                                                    // group by floor and render heading rows
+                                                    const floors = Array.from(new Set(materialsData.map(it => it.floor))).sort((a, b) => (a ?? 0) - (b ?? 0));
+                                                    return (
+                                                        <>
+                                                            {floors.map((floorVal) => (
+                                                                <React.Fragment key={`floor-${floorVal}`}>
+                                                                    <tr className="table-primary">
+                                                                        <td colSpan="4" className="fw-bold">
+                                                                            <i className="bi bi-building me-2"></i>Floor {floorVal} Materials
+                                                                        </td>
+                                                                    </tr>
+                                                                    {materialsData.filter(it => it.floor === floorVal).map((item, idx) => (
+                                                                        <tr key={`f${floorVal}-${idx}`}>
+                                                                            <td>{item.material}</td>
+                                                                            <td className="text-end">{item.quantity.toLocaleString()}</td>
+                                                                            <td className="text-end">{item.unitPrice.toLocaleString()}</td>
+                                                                            <td className="text-end">{Math.round(item.totalPrice).toLocaleString()}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </React.Fragment>
+                                                            ))}
+                                                            <tr className="table-success fw-bold">
+                                                                <td colSpan="3" className="text-end">Total Materials Cost:</td>
+                                                                <td className="text-end">Rs. {Math.round(totalMaterialsCost).toLocaleString()}</td>
+                                                            </tr>
+                                                        </>
+                                                    );
+                                                }
 
+                                                // single-floor default
                                                 return (
                                                     <>
                                                         {materialsData.map((item, index) => (
