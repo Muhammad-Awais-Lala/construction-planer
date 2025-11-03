@@ -59,6 +59,7 @@ const ConstructionSteps = () => {
       setMaterialsConfirmed(false);
     // localStorage.removeItem('constructionEstimate');
     localStorage.clear();
+    window.location.reload();
   };
 
   const renderStepContent = () => {
@@ -89,7 +90,7 @@ const ConstructionSteps = () => {
             <Step key={step.label}>
               <StepLabel >
                 <div className="text-center">
-                  <div className="fw-bold">{step.label}</div>
+                  <div className="fw-bold fs-6">{step.label}</div>
                   <small className="text-muted">{step.description}</small>
                 </div>
               </StepLabel>

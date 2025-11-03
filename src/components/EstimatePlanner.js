@@ -10,7 +10,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     overallWidth: '',
     city: 'Faisalabad',
     quality: 'Standard',
-    numberOfFloors: '',
+    numberOfFloors: '1',
     numberOfBedrooms: '',
     numberOfBathrooms: '',
     numberOfKitchens: '1',
@@ -36,17 +36,27 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     }
   });
 
-  const [floors, setFloors] = useState([{ 
-    floorNumber: 1, 
+  const initialFloors = [{
+    floorNumber: 1,
     floorName: 'Ground Floor',
-    bedrooms: '', 
-    bathrooms: '', 
-    kitchens: '1', 
+    bedrooms: '',
+    bathrooms: '',
+    kitchens: '1',
     livingRooms: '1',
     garage: 'Required',
     drawingDining: 'Required'
-  }]);
+  }];
 
+  const [floors, setFloors] = useState(() => {
+    try {
+      const savedFloors = localStorage.getItem('constructionFloors');
+      return savedFloors ? JSON.parse(savedFloors) : initialFloors;
+    } catch (err) {
+      return initialFloors;
+    }
+  });
+
+  // Save form data to localStorage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem('constructionForm', JSON.stringify(formData));
@@ -191,22 +201,27 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       return next;
     });
 
-    // Update bedrooms and bathrooms for all floors when area changes
+    // Update only ground floor bedrooms and bathrooms when area changes
     setFloors(prevFloors => 
-      prevFloors.map(floor => ({
-        ...floor,
-        bedrooms: derivedRooms,
-        bathrooms: derivedRooms
-      }))
-    );
+      prevFloors.map((floor, index) => 
+        index === 0 
+          ? { ...floor, bedrooms: derivedRooms, bathrooms: derivedRooms }
+          : floor
+      ));
   }
 
   const handleFloorChange = (index, field, value) => {
-    setFloors(prevFloors => 
-      prevFloors.map((floor, i) => 
-        i === index ? { ...floor, [field]: value } : floor
-      )
+    const updatedFloors = floors.map((floor, i) => 
+      i === index ? { ...floor, [field]: value } : floor
     );
+    setFloors(updatedFloors);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('constructionFloors', JSON.stringify(updatedFloors));
+    } catch (err) {
+      // ignore
+    };
   };
 
   const addFloor = () => {
@@ -216,14 +231,22 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     const newFloor = { 
       floorNumber: currentFloorsCount + 1, 
       floorName: getFloorName(currentFloorsCount + 1),
-      bedrooms: formData.numberOfBedrooms || '', 
-      bathrooms: formData.numberOfBathrooms || '', 
+      bedrooms: '', 
+      bathrooms: '', 
       kitchens: '1', 
       livingRooms: '1',
       drawingDining: 'Required'
     };
     
-    setFloors(prev => [...prev, newFloor]);
+    const updatedFloors = [...floors, newFloor];
+    setFloors(updatedFloors);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('constructionFloors', JSON.stringify(updatedFloors));
+    } catch (err) {
+      // ignore
+    }
     
     // Update total floors count in formData
     setFormData(prev => ({
@@ -235,8 +258,6 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
   const removeFloor = (index) => {
     if (floors.length <= 1) return; // At least one floor should remain
     
-    setFloors(prevFloors => prevFloors.filter((_, i) => i !== index));
-    
     // Update floor numbers and total floors count
     const updatedFloors = floors.filter((_, i) => i !== index)
       .map((floor, i) => ({ 
@@ -246,6 +267,13 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       }));
     
     setFloors(updatedFloors);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('constructionFloors', JSON.stringify(updatedFloors));
+    } catch (err) {
+      // ignore
+    }
     
     // Update total floors count in formData
     setFormData(prev => ({
@@ -346,17 +374,17 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
           <div className="col-lg-10">
             <div className="card shadow-lg">
               <div className="card-header bg-primary text-white text-center">
-                <h2 className="mb-0"><i className="bi bi-house-gear me-2"></i>Construction Estimate Planner</h2>
+                <h2 className="mb-0 fs-4"><i className="bi bi-house-gear me-2"></i>Construction Estimate Planner</h2>
               </div>
               <div className="card-body p-4">
                 <form onSubmit={handleSubmit}>
                   <div className="row">
                     {/* Area Value */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="areaValue" className="form-label">Area Value <span className="text-danger fw-bolder">*</span></label>
+                      <label htmlFor="areaValue" className="form-label small">Area Value <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
-                        className={`form-control ${errors.areaValue ? 'is-invalid' : ''}`}
+                        className={`form-control form-control-sm ${errors.areaValue ? 'is-invalid' : ''}`}
                         id="areaValue"
                         name="areaValue"
                         value={formData.areaValue}
@@ -370,9 +398,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Unit */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="unit" className="form-label">Unit</label>
+                      <label htmlFor="unit" className="form-label small">Unit</label>
                       <select
-                        className="form-select"
+                        className="form-select form-select-sm"
                         id="unit"
                         name="unit"
                         value={formData.unit}
@@ -384,9 +412,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Marla Standard */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="marlaStandard" className="form-label">Marla Standard</label>
+                      <label htmlFor="marlaStandard" className="form-label small">Marla Standard</label>
                       <select
-                        className="form-select"
+                        className="form-select form-select-sm"
                         id="marlaStandard"
                         name="marlaStandard"
                         value={formData.marlaStandard}
@@ -399,10 +427,10 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Overall Length */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="overallLength" className="form-label">Overall Length <span className="text-danger fw-bolder">*</span></label>
+                      <label htmlFor="overallLength" className="form-label small">Overall Length <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
-                        className={`form-control ${errors.overallLength ? 'is-invalid' : ''}`}
+                        className={`form-control form-control-sm ${errors.overallLength ? 'is-invalid' : ''}`}
                         id="overallLength"
                         name="overallLength"
                         value={formData.overallLength}
@@ -414,10 +442,10 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Overall Width */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="overallWidth" className="form-label">Overall Width <span className="text-danger fw-bolder">*</span></label>
+                      <label htmlFor="overallWidth" className="form-label small">Overall Width <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
-                        className={`form-control ${errors.overallWidth ? 'is-invalid' : ''}`}
+                        className={`form-control form-control-sm ${errors.overallWidth ? 'is-invalid' : ''}`}
                         id="overallWidth"
                         name="overallWidth"
                         value={formData.overallWidth}
@@ -429,9 +457,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* City */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="city" className="form-label">City</label>
+                      <label htmlFor="city" className="form-label small">City</label>
                       <select
-                        className="form-select"
+                        className="form-select form-select-sm"
                         id="city"
                         name="city"
                         value={formData.city}
@@ -450,13 +478,14 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                     {/* Number of Floors - Now auto-calculated */}
                     <div className="col-lg-4 col-md-6 mb-3">
-                      <label htmlFor="numberOfFloors" className="form-label">Number of Floors <span className="text-danger fw-bolder">*</span></label>
+                      <label htmlFor="numberOfFloors" className="form-label small">Number of Floors <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
-                        className={`form-control ${errors.numberOfFloors ? 'is-invalid' : ''}`}
+                        className={`form-control form-control-sm ${errors.numberOfFloors ? 'is-invalid' : ''}`}
                         id="numberOfFloors"
                         name="numberOfFloors"
                         value={floors.length}
+                        onChange={handleInputChange}
                         readOnly
                         min={1}
                         max={3}
@@ -466,9 +495,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                   </div>
 
                   {/* Dynamic Floors Section */}
-                  <div className="mb-4">
+                    <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                      <h5 className="mb-0">Floors Configuration</h5>
+                      <h5 className="mb-0 fs-5">Floors Configuration</h5>
                       {floors.length < 3 && (
                         <button 
                           type="button" 
@@ -483,7 +512,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     {floors.map((floor, index) => (
                       <div key={index} className="card mb-3">
                         <div className="card-header bg-light d-flex justify-content-between align-items-center">
-                          <h6 className="mb-0">{floor.floorName}</h6>
+                          <h6 className="mb-0 fs-6">{floor.floorName}</h6>
                           {floors.length > 1 && (
                             <button 
                               type="button" 
@@ -497,11 +526,11 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                         <div className="card-body">
                           <div className="row">
                             {/* Bedrooms for this floor */}
-                            <div className="col-lg-3 col-md-6 mb-3">
-                              <label className="form-label">Bedrooms <span className="text-danger fw-bolder">*</span></label>
+                            <div className="col-lg-4 col-md-6 mb-3">
+                              <label className="form-label small">Bedrooms <span className="text-danger fw-bolder">*</span></label>
                               <input
                                 type="number"
-                                className={`form-control ${errors[`floor_${index}_bedrooms`] ? 'is-invalid' : ''}`}
+                                className={`form-control form-control-sm ${errors[`floor_${index}_bedrooms`] ? 'is-invalid' : ''}`}
                                 value={floor.bedrooms}
                                 onChange={(e) => handleFloorChange(index, 'bedrooms', e.target.value)}
                                 placeholder="Bedrooms"
@@ -513,11 +542,11 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                             </div>
 
                             {/* Bathrooms for this floor */}
-                            <div className="col-lg-3 col-md-6 mb-3">
-                              <label className="form-label">Bathrooms <span className="text-danger fw-bolder">*</span></label>
+                            <div className="col-lg-4 col-md-6 mb-3">
+                              <label className="form-label small">Bathrooms <span className="text-danger fw-bolder">*</span></label>
                               <input
                                 type="number"
-                                className={`form-control ${errors[`floor_${index}_bathrooms`] ? 'is-invalid' : ''}`}
+                                className={`form-control form-control-sm ${errors[`floor_${index}_bathrooms`] ? 'is-invalid' : ''}`}
                                 value={floor.bathrooms}
                                 onChange={(e) => handleFloorChange(index, 'bathrooms', e.target.value)}
                                 placeholder="Bathrooms"
@@ -529,11 +558,11 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                             </div>
 
                             {/* Kitchens for this floor */}
-                            <div className="col-lg-3 col-md-6 mb-3">
-                              <label className="form-label">Kitchens</label>
+                            <div className="col-lg-4 col-md-6 mb-3">
+                              <label className="form-label small">Kitchens</label>
                               <input
                                 type="number"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={floor.kitchens}
                                 onChange={(e) => handleFloorChange(index, 'kitchens', e.target.value)}
                                 placeholder="Kitchens"
@@ -542,11 +571,11 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                             </div>
 
                             {/* Living Rooms for this floor */}
-                            <div className="col-lg-3 col-md-6 mb-3">
-                              <label className="form-label">Living Rooms</label>
+                            <div className="col-lg-4 col-md-6 mb-3">
+                              <label className="form-label small">Living Rooms</label>
                               <input
                                 type="number"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={floor.livingRooms}
                                 onChange={(e) => handleFloorChange(index, 'livingRooms', e.target.value)}
                                 placeholder="Living Rooms"
@@ -556,9 +585,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                             {/* Drawing/Dining for this floor */}
                             <div className="col-lg-4 col-md-6 mb-3">
-                              <label className="form-label">Drawing/Dining</label>
+                              <label className="form-label small">Drawing/Dining</label>
                               <select
-                                className="form-select"
+                                className="form-select form-select-sm"
                                 value={floor.drawingDining}
                                 onChange={(e) => handleFloorChange(index, 'drawingDining', e.target.value)}
                               >
@@ -570,9 +599,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                             {/* Garage - Only for Ground Floor */}
                             {index === 0 && (
                               <div className="col-lg-4 col-md-6 mb-3">
-                                <label className="form-label">Garage</label>
+                                <label className="form-label small">Garage</label>
                                 <select
-                                  className="form-select"
+                                  className="form-select form-select-sm"
                                   value={floor.garage}
                                   onChange={(e) => handleFloorChange(index, 'garage', e.target.value)}
                                 >

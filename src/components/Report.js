@@ -29,7 +29,7 @@ const Report = ({ result }) => {
         <div className="container py-5">
             <div className="card shadow-lg">
                 <div className="card-header bg-primary text-white">
-                    <h3 className="mb-0"><i className="bi bi-file-earmark-text me-2"></i>Detailed Construction Report</h3>
+                    <h3 className="mb-0 fs-4"><i className="bi bi-file-earmark-text me-2"></i>Detailed Construction Report</h3>
                 </div>
                 <div className="card-body">
                     {/* Cost Summary Cards */}
@@ -37,8 +37,8 @@ const Report = ({ result }) => {
                         <div className="col-md-4 mb-3">
                             <div className="card shadow-lg h-100" style={{ backgroundColor: "#fca311" }}>
                                 <div className="card-body text-center">
-                                    <h6 className="card-title text-muted mb-3"><i className="bi bi-building me-1"></i>Grey Structure Cost</h6>
-                                    <h3 className="card-text text-primary mb-0">
+                                    <h6 className="card-title text-muted mb-3 fs-6"><i className="bi bi-building me-1"></i>Grey Structure Cost</h6>
+                                    <h3 className="card-text text-primary mb-0 fs-4">
                                         {/* Rs. {   totalMaterialsCost + cost?.labour_cost  || '0'} */}
                                         {/* {totalMaterialsCost && cost?.labour_cost ?
                                             `Rs. ${(totalMaterialsCost + cost.labour_cost).toLocaleString()}`
@@ -53,8 +53,8 @@ const Report = ({ result }) => {
                         <div className="col-md-4 mb-3">
                             <div className="card shadow-lg bg-success h-100">
                                 <div className="card-body text-center">
-                                    <h6 className="card-title text-muted mb-3"><i className="bi bi-brush me-1"></i>Finishing Cost</h6>
-                                    <h3 className="card-text text-white mb-0">
+                                    <h6 className="card-title text-muted mb-3 fs-6"><i className="bi bi-brush me-1"></i>Finishing Cost</h6>
+                                    <h3 className="card-text text-white mb-0 fs-4">
                                         Rs. {cost?.finishing_cost?.toLocaleString() || '0'}
                                     </h3>
                                 </div>
@@ -63,8 +63,8 @@ const Report = ({ result }) => {
                         <div className="col-md-4 mb-3">
                             <div className="card shadow bg-primary h-100">
                                 <div className="card-body text-center">
-                                    <h6 className="card-title text-white mb-3"><i className="bi bi-calculator me-1"></i>Total Cost</h6>
-                                    <h3 className="card-text text-white mb-0">
+                                    <h6 className="card-title text-white mb-3 fs-6"><i className="bi bi-calculator me-1"></i>Total Cost</h6>
+                                    <h3 className="card-text text-white mb-0 fs-4">
                                         {/* Rs. {cost?.total_cost?.toLocaleString() || '0'} */}
                                         {`Rs. ${totalCost.toLocaleString() || '0'}`}
                                     </h3>
@@ -78,7 +78,7 @@ const Report = ({ result }) => {
                         <div className="col-12 mb-4">
                             <div className="card shadow p-2">
                                 <div className="card-header bg-light">
-                                    <h4 className="mb-0"><i className="bi bi-layout-text-sidebar me-2"></i>Building Plan Details</h4>
+                                    <h4 className="mb-0 fs-5"><i className="bi bi-layout-text-sidebar me-2"></i>Building Plan Details</h4>
                                 </div>
                                 <div className="card-body">
                                     <div className="table-responsive">
@@ -86,7 +86,7 @@ const Report = ({ result }) => {
                                             <tbody>
                                                 {Object.entries(plan).map(([key, value]) => (
                                                     <tr key={key}>
-                                                        <th style={{ width: '30%' }} className="bg-light text-primary">{key}</th>
+                                                        <th style={{ width: '30%' }} className="bg-light text-primary small text-uppercase">{key}</th>
                                                         <td>{Array.isArray(value) ? value.join(', ') : value}</td>
                                                     </tr>
                                                 ))}
@@ -101,23 +101,53 @@ const Report = ({ result }) => {
                         <div className="col-12 mb-4">
                             <div className="table-responsive card shadow p-2">
                                 <div className="card-header bg-light">
-                                    <h4>Material Cost Breakdown</h4>
+                                    <h4 className="fs-5">Material Cost Breakdown</h4>
                                 </div>
                                 <table className="table table-sm table-hover">
                                     <thead className="">
-                                        <tr>
-                                            <th>Material</th>
-                                            <th className="text-end">Quantity</th>
-                                            <th className="text-end">Unit Price (Rs.)</th>
-                                            <th className="text-end">Total Price (Rs.)</th>
+                                        <tr className="small text-uppercase text-muted">
+                                            <th className="fw-semibold">Material</th>
+                                            <th className="text-end fw-semibold">Quantity</th>
+                                            <th className="text-end fw-semibold">Unit Price (Rs.)</th>
+                                            <th className="text-end fw-semibold">Total Price (Rs.)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {(() => {
                                             try {
                                                 const materialsData = JSON.parse(localStorage.getItem('constructionMaterials'));
-                                                // const totalMaterialsCost = parseFloat(localStorage.getItem('constructionTotalMaterialsCost') || '0');
+                                                const hasFloors = Array.isArray(materialsData) && materialsData.some(it => typeof it.floor !== 'undefined');
+                                                if (hasFloors) {
+                                                    // group by floor and render heading rows
+                                                    const floors = Array.from(new Set(materialsData.map(it => it.floor))).sort((a, b) => (a ?? 0) - (b ?? 0));
+                                                    return (
+                                                        <>
+                                                            {floors.map((floorVal) => (
+                                                                <React.Fragment key={`floor-${floorVal}`}>
+                                                                    <tr className="table-primary">
+                                                                        <td colSpan="4" className="fw-bold">
+                                                                            <i className="bi bi-building me-2"></i>{(floorVal === 0 || floorVal === '0') ? 'Ground Floor' : `Floor ${floorVal}`} Materials
+                                                                        </td>
+                                                                    </tr>
+                                                                    {materialsData.filter(it => it.floor === floorVal).map((item, idx) => (
+                                                                        <tr key={`f${floorVal}-${idx}`}>
+                                                                            <td>{item.material}</td>
+                                                                            <td className="text-end">{item.quantity.toLocaleString()}</td>
+                                                                            <td className="text-end">{item.unitPrice.toLocaleString()}</td>
+                                                                            <td className="text-end">{Math.round(item.totalPrice).toLocaleString()}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </React.Fragment>
+                                                            ))}
+                                                            <tr className="table-success fw-bold">
+                                                                <td colSpan="3" className="text-end">Total Materials Cost:</td>
+                                                                <td className="text-end">Rs. {Math.round(totalMaterialsCost).toLocaleString()}</td>
+                                                            </tr>
+                                                        </>
+                                                    );
+                                                }
 
+                                                // single-floor default
                                                 return (
                                                     <>
                                                         {materialsData.map((item, index) => (
@@ -154,7 +184,7 @@ const Report = ({ result }) => {
                         <div className="col-12 mb-4">
                             <div className="card shadow p-2">
                                 <div className="card-header bg-light">
-                                    <h4 className="mb-0"><i className="bi bi-stack me-2"></i>Grey Structure Cost Breakdown</h4>
+                                    <h4 className="mb-0 fs-5"><i className="bi bi-stack me-2"></i>Grey Structure Cost Breakdown</h4>
                                 </div>
                                 <div className="card-body">
                                     <div className="receipt">
@@ -179,7 +209,7 @@ const Report = ({ result }) => {
                         <div className="col-12 mb-4">
                             <div className="card shadow p-2">
                                 <div className="card-header bg-light">
-                                    <h4 className="mb-0"><i className="bi bi-calculator me-2"></i>Total Project Cost Breakdown</h4>
+                                    <h4 className="mb-0 fs-5"><i className="bi bi-calculator me-2"></i>Total Project Cost Breakdown</h4>
                                 </div>
                                 <div className="card-body">
                                     <div className="receipt">
@@ -218,9 +248,9 @@ const Report = ({ result }) => {
                                                         <div className="card-body">
                                                             <div className="d-flex align-items-center mb-3">
                                                                 <i className={`bi bi-${getCategoryIcon(item.category)} fs-4 text-primary me-2`}></i>
-                                                                <h5 className="card-title mb-0 text-primary">{item.category}</h5>
+                                                                <h5 className="card-title mb-0 text-primary fs-6">{item.category}</h5>
                                                             </div>
-                                                            <h6 className="text-muted mb-2">{item.material_type}</h6>
+                                                            <h6 className="text-muted mb-2 fs-6">{item.material_type}</h6>
                                                             <p className="card-text small">
                                                                 <i className="bi bi-info-circle me-2 text-info"></i>
                                                                 {item.notes}
