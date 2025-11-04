@@ -226,7 +226,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
   const addFloor = () => {
     const currentFloorsCount = floors.length;
-    if (currentFloorsCount >= 3) return; // Maximum 3 floors allowed
+    if (currentFloorsCount >= 2) return; // Maximum 3 floors allowed
     
     const newFloor = { 
       floorNumber: currentFloorsCount + 1, 
@@ -322,10 +322,8 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     setLoading(true);
 
     try {
-      // Calculate totals from all floors
-      const totalBedrooms = floors.reduce((sum, floor) => sum + parseInt(floor.bedrooms || 0), 0);
-      const totalBathrooms = floors.reduce((sum, floor) => sum + parseInt(floor.bathrooms || 0), 0);
-      const totalLivingRooms = floors.reduce((sum, floor) => sum + parseInt(floor.livingRooms || 0), 0);
+      // Use only Ground Floor (index 0) values for main keys
+      const groundFloor = floors[0] || {};
 
       const payload = {
         area_value: formData.areaValue ? parseFloat(formData.areaValue) : undefined,
@@ -335,18 +333,20 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         city: formData.city,
         overall_length: formData.overallLength ? parseFloat(formData.overallLength) : undefined,
         overall_width: formData.overallWidth ? parseFloat(formData.overallWidth) : undefined,
-        bedrooms: totalBedrooms,
-        bathrooms: totalBathrooms,
-        living_rooms: totalLivingRooms,
+        bedrooms: groundFloor.bedrooms ? parseInt(groundFloor.bedrooms) : undefined,
+        bathrooms: groundFloor.bathrooms ? parseInt(groundFloor.bathrooms) : undefined,
+        living_rooms: groundFloor.livingRooms ? parseInt(groundFloor.livingRooms) : undefined,
         drawing_dining: floors[0]?.drawingDining || 'Required',
         garage: floors[0]?.garage || 'Required',
         floors: formData.numberOfFloors ? parseFloat(formData.numberOfFloors) : undefined,
         extra_features: formData.extraFeatures,
         style: formData.style,
-        floors_detail: floors.map(floor => ({
-          ...floor,
-          floorName: getFloorName(floor.floorNumber)
-        }))
+        floors_detail: floors
+          .filter(floor => floor.floorNumber !== 1) // Remove ground floor (floorNumber 1)
+          .map(floor => ({
+            ...floor,
+            floorName: getFloorName(floor.floorNumber)
+          }))
       };
       
       console.log('Payload:', payload);
@@ -361,6 +361,12 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         onEstimateComplete(responseData);
       }
     } catch (error) {
+      // Log server response for debugging 500 errors
+      // eslint-disable-next-line no-console
+      console.error('Estimate API error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+      });
       window.toastify('Failed to generate estimate', 'error');
     } finally {
       setLoading(false);
@@ -477,7 +483,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     </div>
 
                     {/* Number of Floors - Now auto-calculated */}
-                    <div className="col-lg-4 col-md-6 mb-3">
+                    <div className="col-lg-4 col-md-6 mb-3 d-none">
                       <label htmlFor="numberOfFloors" className="form-label small">Number of Floors <span className="text-danger fw-bolder">*</span></label>
                       <input
                         type="number"
@@ -492,7 +498,25 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                       />
                       {errors.numberOfFloors && <div className="invalid-feedback">{errors.numberOfFloors}</div>}
                     </div>
+
+                         {/* Quality */}
+                    <div className="col-lg-4 col-md-6  mb-3">
+                    <label htmlFor="quality" className="form-label small">Quality</label>
+                    <select
+                      className="form-select form-select-sm"
+                      id="quality"
+                      name="quality"
+                      value={formData.quality}
+                      onChange={handleInputChange}
+                    >
+                      <option value="Standard">Standard</option>
+                      <option value="Economy">Economy</option>
+                      <option value="Premium">Premium</option>
+                    </select>
                   </div>
+                  </div>
+
+
 
                   {/* Dynamic Floors Section */}
                     <div className="mb-4">
@@ -567,6 +591,8 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                                 onChange={(e) => handleFloorChange(index, 'kitchens', e.target.value)}
                                 placeholder="Kitchens"
                                 min="1"
+                                // readOnly
+                                disabled
                               />
                             </div>
 
@@ -580,6 +606,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                                 onChange={(e) => handleFloorChange(index, 'livingRooms', e.target.value)}
                                 placeholder="Living Rooms"
                                 min="1"
+                                disabled
                               />
                             </div>
 

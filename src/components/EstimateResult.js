@@ -153,7 +153,7 @@
                   </tbody>
                 </table>
                 <div className="text-end mt-2">
-                  <span className="fw-bold small"><i className="bi bi-calculator me-2"></i>{floorLabel} Total: Rs. {formatNumber(Math.round(floorTotal))}</span>
+                  <span className="fw-bold"><i className="bi bi-calculator me-2"></i>{floorLabel} Total: Rs. {formatNumber(Math.round(floorTotal))}</span>
                 </div>
               </div>
             </div>
