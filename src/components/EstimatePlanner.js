@@ -226,7 +226,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
   const addFloor = () => {
     const currentFloorsCount = floors.length;
-    if (currentFloorsCount >= 2) return; // Maximum 3 floors allowed
+    if (currentFloorsCount >= 3) return; // Maximum 3 floors allowed
     
     const newFloor = { 
       floorNumber: currentFloorsCount + 1, 
@@ -361,12 +361,6 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         onEstimateComplete(responseData);
       }
     } catch (error) {
-      // Log server response for debugging 500 errors
-      // eslint-disable-next-line no-console
-      console.error('Estimate API error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-      });
       window.toastify('Failed to generate estimate', 'error');
     } finally {
       setLoading(false);
@@ -522,7 +516,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                     <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <h5 className="mb-0 fs-5">Floors Configuration</h5>
-                      {floors.length < 2 && (
+                      {floors.length < 3 && (
                         <button 
                           type="button" 
                           className="btn btn-success btn-sm"
