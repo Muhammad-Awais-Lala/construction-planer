@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 
-const EstimatePlanner = ({ onEstimateComplete }) => {
+const EstimatePlanner = ({ onEstimateComplete, stepper }) => {
   const initialFormData = {
     areaValue: '',
     unit: 'Marla',
@@ -100,7 +100,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       3: { width: 18, length: 37 },
       4: { width: 25, length: 36 },
       5: { width: 25, length: 45 },
-      6 : { width: 30, length: 45 },
+      6: { width: 30, length: 45 },
       7: { width: 35, length: 45 },
       8: { width: 30, length: 60 },
       9: { width: 35, length: 58 },
@@ -108,9 +108,9 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     },
     "272.25 (Lahore/old)": {
       3: { width: 20, length: 40.8 },
-      4: { width: 25, length: 43.6  },
+      4: { width: 25, length: 43.6 },
       5: { width: 25, length: 54.5 },
-      6 : { width: 30, length: 54.5 },
+      6: { width: 30, length: 54.5 },
       7: { width: 30, length: 63.5 },
       8: { width: 35, length: 62.2 },
       9: { width: 35, length: 70 },
@@ -123,7 +123,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'marlaStandard') {
       setFormData(prev => {
         const next = { ...prev, [name]: value };
@@ -140,7 +140,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         }
         try {
           localStorage.setItem('constructionForm', JSON.stringify(next));
-        } catch (err) {}
+        } catch (err) { }
         return next;
       });
     } else {
@@ -148,7 +148,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
         const next = { ...prev, [name]: value };
         try {
           localStorage.setItem('constructionForm', JSON.stringify(next));
-        } catch (err) {}
+        } catch (err) { }
         return next;
       });
     }
@@ -197,25 +197,25 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       const next = { ...prev, numberOfBedrooms: derivedRooms, numberOfBathrooms: derivedRooms, areaValue: value, overallLength, overallWidth };
       try {
         localStorage.setItem('constructionForm', JSON.stringify(next));
-      } catch (err) {}
+      } catch (err) { }
       return next;
     });
 
     // Update only ground floor bedrooms and bathrooms when area changes
-    setFloors(prevFloors => 
-      prevFloors.map((floor, index) => 
-        index === 0 
+    setFloors(prevFloors =>
+      prevFloors.map((floor, index) =>
+        index === 0
           ? { ...floor, bedrooms: derivedRooms, bathrooms: derivedRooms }
           : floor
       ));
   }
 
   const handleFloorChange = (index, field, value) => {
-    const updatedFloors = floors.map((floor, i) => 
+    const updatedFloors = floors.map((floor, i) =>
       i === index ? { ...floor, [field]: value } : floor
     );
     setFloors(updatedFloors);
-    
+
     // Save to localStorage
     try {
       localStorage.setItem('constructionFloors', JSON.stringify(updatedFloors));
@@ -227,57 +227,57 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
   const addFloor = () => {
     const currentFloorsCount = floors.length;
     if (currentFloorsCount >= 3) return; // Maximum 3 floors allowed
-    
-    const newFloor = { 
-      floorNumber: currentFloorsCount + 1, 
+
+    const newFloor = {
+      floorNumber: currentFloorsCount + 1,
       floorName: getFloorName(currentFloorsCount + 1),
-      bedrooms: '', 
-      bathrooms: '', 
-      kitchens: '1', 
+      bedrooms: '',
+      bathrooms: '',
+      kitchens: '1',
       livingRooms: '1',
       drawingDining: 'Required'
     };
-    
+
     const updatedFloors = [...floors, newFloor];
     setFloors(updatedFloors);
-    
+
     // Save to localStorage
     try {
       localStorage.setItem('constructionFloors', JSON.stringify(updatedFloors));
     } catch (err) {
       // ignore
     }
-    
+
     // Update total floors count in formData
     setFormData(prev => ({
-      ...prev, 
+      ...prev,
       numberOfFloors: currentFloorsCount + 1
     }));
   };
 
   const removeFloor = (index) => {
     if (floors.length <= 1) return; // At least one floor should remain
-    
+
     // Update floor numbers and total floors count
     const updatedFloors = floors.filter((_, i) => i !== index)
-      .map((floor, i) => ({ 
-        ...floor, 
+      .map((floor, i) => ({
+        ...floor,
         floorNumber: i + 1,
         floorName: getFloorName(i + 1)
       }));
-    
+
     setFloors(updatedFloors);
-    
+
     // Save to localStorage
     try {
       localStorage.setItem('constructionFloors', JSON.stringify(updatedFloors));
     } catch (err) {
       // ignore
     }
-    
+
     // Update total floors count in formData
     setFormData(prev => ({
-      ...prev, 
+      ...prev,
       numberOfFloors: updatedFloors.length
     }));
   };
@@ -310,6 +310,11 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+    const handleReset = () => {
+    localStorage.clear();
+    window.location.reload();
   };
 
   const handleSubmit = async (e) => {
@@ -348,7 +353,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
             floorName: getFloorName(floor.floorNumber)
           }))
       };
-      
+
       console.log('Payload:', payload);
       const response = await axiosClient.post('/estimate', payload);
       const responseData = response.data;
@@ -356,7 +361,7 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
       window.toastify('Estimate generated successfully', 'success');
       localStorage.removeItem("constructionMaterials")
       localStorage.removeItem("constructionTotalMaterialsCost")
-      
+
       if (onEstimateComplete) {
         onEstimateComplete(responseData);
       }
@@ -371,10 +376,10 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
     <div className="py-5">
       <div className="container">
         <div className="row justify-content-center">
-          <div className="col-lg-10">
+          <div className="col-lg-12">
             <div className="card shadow-lg">
               <div className="card-header bg-primary text-white text-center">
-                <h2 className="mb-0 fs-4"><i className="bi bi-house-gear me-2"></i>Construction Estimate Planner</h2>
+                {stepper}
               </div>
               <div className="card-body p-4">
                 <form onSubmit={handleSubmit}>
@@ -493,36 +498,37 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                       {errors.numberOfFloors && <div className="invalid-feedback">{errors.numberOfFloors}</div>}
                     </div>
 
-                         {/* Quality */}
+                    {/* Quality */}
                     <div className="col-lg-4 col-md-6  mb-3">
-                    <label htmlFor="quality" className="form-label small">Quality</label>
-                    <select
-                      className="form-select form-select-sm"
-                      id="quality"
-                      name="quality"
-                      value={formData.quality}
-                      onChange={handleInputChange}
-                    >
-                      <option value="Standard">Standard</option>
-                      <option value="Economy">Economy</option>
-                      <option value="Premium">Premium</option>
-                    </select>
-                  </div>
+                      <label htmlFor="quality" className="form-label small">Quality</label>
+                      <select
+                        className="form-select form-select-sm"
+                        id="quality"
+                        name="quality"
+                        value={formData.quality}
+                        onChange={handleInputChange}
+                      >
+                        <option value="Standard">Standard</option>
+                        <option value="Economy">Economy</option>
+                        <option value="Premium">Premium</option>
+                      </select>
+                    </div>
                   </div>
 
 
 
                   {/* Dynamic Floors Section */}
-                    <div className="mb-4">
+                  <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <h5 className="mb-0 fs-5">Floors Configuration</h5>
                       {floors.length < 3 && (
-                        <button 
-                          type="button" 
-                          className="btn btn-success btn-sm"
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-rounded btn-sm"
                           onClick={addFloor}
                         >
-                          <i className="bi bi-plus-circle me-1"></i>Add Floor
+                          {/* <i className="bi bi-plus-circle me-1"></i> */}
+                          Add Floor
                         </button>
                       )}
                     </div>
@@ -532,12 +538,12 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                         <div className="card-header bg-light d-flex justify-content-between align-items-center">
                           <h6 className="mb-0 fs-6">{floor.floorName}</h6>
                           {floors.length > 1 && (
-                            <button 
-                              type="button" 
-                              className="btn btn-danger btn-sm"
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm"
                               onClick={() => removeFloor(index)}
                             >
-                              <i className="bi bi-trash"></i>
+                              <i className="bi bi-trash-fill"></i>
                             </button>
                           )}
                         </div>
@@ -639,10 +645,10 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
 
                   {/* Submit Button */}
                   <div className="row">
-                    <div className="col-12">
+                    <div className="col-12 d-flex justify-content-end gap-2">
                       <button
                         type="submit"
-                        className="btn btn-primary w-100"
+                        className="btn btn-primary btn-rounded"
                         disabled={loading}
                       >
                         {loading ? (
@@ -651,9 +657,15 @@ const EstimatePlanner = ({ onEstimateComplete }) => {
                             Getting Estimate...
                           </>
                         ) : (
-                          <><i className="bi bi-calculator me-2"></i>Get Estimate</>
+                          <span className="fw-bold">
+                            {/* <i className="bi bi-calculator me-2"></i> */}
+                            Get Estimate Budget
+                          </span>
                         )}
                       </button>
+
+                      <button className="btn btn-outline-dark btn-rounded me-1" onClick={handleReset}>Reset  Details<i className="bi bi-arrow-counterclockwise ms-1"></i></button>
+
                     </div>
                   </div>
                 </form>

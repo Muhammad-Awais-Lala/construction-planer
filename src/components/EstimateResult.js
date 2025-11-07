@@ -3,7 +3,7 @@
   import React, { useState } from 'react';
   import materialsData from '../data/materialPrices.json';
   
-   const EstimateResult = ({ result, onConfirm }) => {
+ const EstimateResult = ({ result, onConfirm, stepper }) => {
       const { materials } = result || {};
   
       const perFloor = Array.isArray(materials?.PerFloorBreakdown) ? materials.PerFloorBreakdown : null;
@@ -111,7 +111,7 @@
   
         return (
           <div className="card shadow mb-4" key={`floor-card-${floorIdx}`}>
-            <div className="card-header bg-primary text-white">
+            <div className="card-header bg-light text-center">
               <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>{floorLabel} Materials</h5>
             </div>
             <div className="card-body">
@@ -227,28 +227,25 @@
       if (!result) return null;
       return (
         <div className="container py-5">
-          <div className="row">
-            <div className="col mb-4">
-              {isMultiFloor ? (
-                <>
-                  {perFloor.map((floorObj, idx) => renderFloorTable(floorObj, idx))}
-                  {/* <div className="card shadow">
-                    <div className="card-header bg-primary text-white">
-                      <h3 className="card-title mb-0"><i className="bi bi-sum me-2"></i>Total Summary</h3>
-                    </div>
-                    <div className="card-body">
-                      <div className="text-end">
-                        <h5 className="fw-bold"><i className="bi bi-calculator me-2"></i>Total Estimated Material Cost: Rs. {formatNumber(Math.round(overallSelectedTotal))}</h5>
-                      </div>
-                    </div>
-                  </div> */}
-                </>
-              ) : (
-                renderSingleTable()
-              )}
-  
-              <div className="d-flex justify-content-end mt-3">
-                <button className="btn btn-success" onClick={handleConfirm}><i className="bi bi-check-lg me-1"></i> Confirm Materials</button>
+          <div className="card shadow-lg border-0">
+            <div className="card-header bg-primary text-white p-3">
+              {stepper}
+            </div>
+            <div className="card-body p-4">
+              <div className="row">
+                <div className="col mb-4">
+                  {isMultiFloor ? (
+                    <>
+                      {perFloor.map((floorObj, idx) => renderFloorTable(floorObj, idx))}
+                    </>
+                  ) : (
+                    renderSingleTable()
+                  )}
+      
+                  <div className="d-flex justify-content-end mt-3">
+                    <button className="btn btn-primary btn-rounded" onClick={handleConfirm}><i className="bi bi-check-lg me-1"></i> Confirm Materials</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -257,7 +254,6 @@
   };
   
   export default EstimateResult;
-
 
 
 

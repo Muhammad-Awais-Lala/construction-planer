@@ -1,7 +1,26 @@
-$primary:#1d3557;
+// $primary:#1d3557;
+$primary:#EFE223;
 @import '~bootstrap/scss/bootstrap.scss';
 
-// bootstrap-icons-path: '~bootstrap-icons/font/';
+
 @import '~bootstrap-icons/font/bootstrap-icons.css';
+
+.btn-primary {
+//   border-radius: 50px; /* Make it round */
+//   padding: 8px 20px; /* Adjust padding */
+  background-color: $primary !important; /* Ensure primary color */
+  border-color: $primary !important; /* Ensure primary color */
+  color: #333 !important; /* Darker text for contrast */
+
+  &:hover {
+    background-color: darken($primary, 10%) !important;
+    border-color: darken($primary, 10%) !important;
+  }
+}
+
+.btn-rounded {
+  border-radius: 50px !important; /* Make it round */
+  padding: 8px 20px !important; /* Adjust padding */
+}
 
 // @import '~bootstrap/dist/css/bootstrap.min.css';
