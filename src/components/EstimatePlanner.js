@@ -378,7 +378,7 @@ const EstimatePlanner = ({ onEstimateComplete, stepper }) => {
         <div className="row justify-content-center">
           <div className="col-lg-12">
             <div className="card shadow-lg">
-              <div className="card-header bg-primary text-white text-center">
+              <div className="card-header bg-primary text-white text-center p-3">
                 {stepper}
               </div>
               <div className="card-body p-4">
