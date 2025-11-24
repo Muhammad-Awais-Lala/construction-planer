@@ -3,6 +3,7 @@ import { Stepper, Step, StepLabel, Paper, Box, Button } from '@mui/material';
 import EstimatePlanner from './EstimatePlanner';
 import EstimateResult from './EstimateResult';
 import Report from './Report';
+import ArchitectureDesign from './ArchitectureDesign';
 
 const steps = [
   {
@@ -16,6 +17,10 @@ const steps = [
   {
     label: 'Detailed Report',
     description: 'View comprehensive construction report'
+  },
+  {
+    label: 'Architecture Design',
+    description: 'Design your building architecture'
   }
 ];
 
@@ -134,6 +139,8 @@ const ConstructionSteps = () => {
         />;
       case 2:
         return <Report result={estimateData?.result} stepper={stepper} />;
+      case 3:
+        return <ArchitectureDesign stepper={stepper} />;
       default:
         return null;
     }
