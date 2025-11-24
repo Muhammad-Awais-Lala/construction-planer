@@ -1,13 +1,14 @@
 import React from 'react';
-import './App.css';
-import Home from './pages/Home';
 import { ToastContainer } from 'react-toastify';
+import './scss/_bootstrap.scss';
+import './App.css';
+import Routes from './pages/Routes';
 
 function App() {
   return (
     <div className="App">
       <div className="container-fluid">
-        <Home />
+        <Routes />
       </div>
 
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light">
@@ -19,8 +20,8 @@ function App() {
 
 export default App;
 
-            {/* Cost Table */}
-                {/* <div className="col-lg-6 mb-4">
+{/* Cost Table */ }
+{/* <div className="col-lg-6 mb-4">
           <div className="card shadow">
             <div className="card-header bg-primary text-white">
               <h3 className="card-title mb-0">Cost Breakdown</h3>
@@ -62,8 +63,8 @@ export default App;
           </div>
         </div> */}
 
-                {/* Design Suggestions */}
-                {/* <div className="col-12 mb-4">
+{/* Design Suggestions */ }
+{/* <div className="col-12 mb-4">
           <div className="card shadow">
             <div className="card-header bg-primary text-white">
               <h3 className="card-title mb-0">Suggested Designs</h3>
@@ -88,4 +89,3 @@ export default App;
             </div>
           </div>
         </div> */}
-    
