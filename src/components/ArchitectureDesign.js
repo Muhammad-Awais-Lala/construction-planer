@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import Zoom from 'react-medium-image-zoom';
 import axiosClient from '../api/axiosClient';
+
+
 
 const ArchitectureDesign = ({ stepper }) => {
     // Helper function to get initial form data from localStorage
@@ -11,10 +14,11 @@ const ArchitectureDesign = ({ stepper }) => {
 
                 // Map constructionForm data to architecture design form
                 return {
-                    plot_depth_ft: constructionData.overallLength || 60,
-                    plot_width_ft: constructionData.overallWidth || 20,
+                    plot_depth_ft: constructionData.overallLength || 0,
+                    plot_width_ft: constructionData.overallWidth || 0,
                     bedrooms: constructionData.numberOfBedrooms || 2,
                     bathrooms: constructionData.numberOfBathrooms || 2,
+                    number_of_floors: constructionData.numberOfFloors || 1,
                     kitchen_type: 'open', // Default as not in constructionForm
                     lounge_required: constructionData.numberOfLivingRooms > 0 || true,
                     drawing_dining_required: constructionData.drawingDining === 'Required' || false,
@@ -28,18 +32,19 @@ const ArchitectureDesign = ({ stepper }) => {
         }
 
         // Return default values if localStorage is empty or error occurs
-        return {
-            plot_depth_ft: 60,
-            plot_width_ft: 20,
-            bedrooms: 2,
-            bathrooms: 2,
-            kitchen_type: 'open',
-            lounge_required: true,
-            drawing_dining_required: false,
-            garage_required: true,
-            architectural_style: 'Modern',
-            extra_features: ''
-        };
+        // return {
+        //     plot_depth_ft: 60,
+        //     plot_width_ft: 20,
+        //     bedrooms: 2,
+        //     bathrooms: 2,
+        //     number_of_floors: 1,
+        //     kitchen_type: 'open',
+        //     lounge_required: true,
+        //     drawing_dining_required: false,
+        //     garage_required: true,
+        //     architectural_style: 'Modern',
+        //     extra_features: ''
+        // };
     };
 
     const [formData, setFormData] = useState(getInitialFormData());
@@ -48,10 +53,21 @@ const ArchitectureDesign = ({ stepper }) => {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
 
-    // Update form data when component mounts or localStorage changes
+    // Load saved images from localStorage on component mount
     useEffect(() => {
         const initialData = getInitialFormData();
         setFormData(initialData);
+
+        // Load saved architecture design images
+        try {
+            const savedImages = localStorage.getItem('architectureDesignImages');
+            if (savedImages) {
+                const imagesData = JSON.parse(savedImages);
+                setResult(imagesData);
+            }
+        } catch (err) {
+            console.error('Error loading saved images:', err);
+        }
     }, []);
 
     const handleInputChange = (e) => {
@@ -69,18 +85,31 @@ const ArchitectureDesign = ({ stepper }) => {
         setResult(null);
 
         try {
+            // Retrieve floors configuration from localStorage
+            let floorsConfiguration = [];
+            try {
+                const savedFloors = localStorage.getItem('constructionFloors');
+                if (savedFloors) {
+                    floorsConfiguration = JSON.parse(savedFloors);
+                }
+            } catch (err) {
+                console.error('Error loading floors configuration:', err);
+            }
+
             // Convert form data to match API requirements
             const payload = {
                 plot_depth_ft: parseFloat(formData.plot_depth_ft),
                 plot_width_ft: parseFloat(formData.plot_width_ft),
-                bedrooms: parseInt(formData.bedrooms),
-                bathrooms: parseInt(formData.bathrooms),
+                // bedrooms: parseInt(formData.bedrooms),
+                // bathrooms: parseInt(formData.bathrooms),
+                // lounge_required: formData.lounge_required,
+                // drawing_dining_required: formData.drawing_dining_required,
+                // garage_required: formData.garage_required,
+                number_of_floors: parseInt(formData.number_of_floors),
                 kitchen_type: formData.kitchen_type,
-                lounge_required: formData.lounge_required,
-                drawing_dining_required: formData.drawing_dining_required,
-                garage_required: formData.garage_required,
                 architectural_style: formData.architectural_style,
-                extra_features: formData.extra_features
+                extra_features: formData.extra_features,
+                floors_configuration: floorsConfiguration
             };
 
             console.log('Payload:', payload);
@@ -88,7 +117,14 @@ const ArchitectureDesign = ({ stepper }) => {
             const responseData = response.data;
             console.log('Response:', responseData);
 
-            setResult(responseData);
+            // Save only the image URLs to localStorage
+            const imageUrls = {
+                blueprint_url: responseData.blueprint_url || null,
+                elevation_url: responseData.elevation_url || null
+            };
+
+            localStorage.setItem('architectureDesignImages', JSON.stringify(imageUrls));
+            setResult(imageUrls);
             window.toastify('Architecture design generated successfully', 'success');
         } catch (err) {
             console.error('Error:', err);
@@ -104,6 +140,10 @@ const ArchitectureDesign = ({ stepper }) => {
         setFormData(initialData);
         setResult(null);
         setError(null);
+
+        // Clear saved images from localStorage
+        localStorage.removeItem('architectureDesignImages');
+        window.toastify('Architecture design reset successfully', 'info');
     };
 
     return (
@@ -162,7 +202,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                 </div>
 
                                                 {/* Room Configuration */}
-                                                <div className="col-lg-4 col-md-6 mb-3">
+                                                {/* <div className="col-lg-4 col-md-6 mb-3">
                                                     <label htmlFor="bedrooms" className="form-label small">
                                                         Bedrooms <span className="text-danger fw-bolder">*</span>
                                                     </label>
@@ -178,9 +218,9 @@ const ArchitectureDesign = ({ stepper }) => {
                                                         max="10"
                                                         required
                                                     />
-                                                </div>
+                                                </div> */}
 
-                                                <div className="col-lg-4 col-md-6 mb-3">
+                                                {/* <div className="col-lg-4 col-md-6 mb-3">
                                                     <label htmlFor="bathrooms" className="form-label small">
                                                         Bathrooms <span className="text-danger fw-bolder">*</span>
                                                     </label>
@@ -196,7 +236,9 @@ const ArchitectureDesign = ({ stepper }) => {
                                                         max="10"
                                                         required
                                                     />
-                                                </div>
+                                                </div> */}
+
+
 
                                                 <div className="col-lg-4 col-md-6 mb-3">
                                                     <label htmlFor="kitchen_type" className="form-label small">
@@ -238,7 +280,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                 </div>
 
                                                 {/* Features */}
-                                                <div className="col-lg-4 col-md-6 mb-3">
+                                                {/* <div className="col-lg-4 col-md-6 mb-3">
                                                     <label className="form-label small d-block">Lounge Required</label>
                                                     <div className="form-check form-switch">
                                                         <input
@@ -253,9 +295,9 @@ const ArchitectureDesign = ({ stepper }) => {
                                                             {formData.lounge_required ? 'Yes' : 'No'}
                                                         </label>
                                                     </div>
-                                                </div>
+                                                </div> */}
 
-                                                <div className="col-lg-4 col-md-6 mb-3">
+                                                {/* <div className="col-lg-4 col-md-6 mb-3">
                                                     <label className="form-label small d-block">Drawing/Dining Required</label>
                                                     <div className="form-check form-switch">
                                                         <input
@@ -270,9 +312,9 @@ const ArchitectureDesign = ({ stepper }) => {
                                                             {formData.drawing_dining_required ? 'Yes' : 'No'}
                                                         </label>
                                                     </div>
-                                                </div>
+                                                </div> */}
 
-                                                <div className="col-lg-4 col-md-6 mb-3">
+                                                {/* <div className="col-lg-4 col-md-6 mb-3">
                                                     <label className="form-label small d-block">Garage Required</label>
                                                     <div className="form-check form-switch">
                                                         <input
@@ -287,8 +329,25 @@ const ArchitectureDesign = ({ stepper }) => {
                                                             {formData.garage_required ? 'Yes' : 'No'}
                                                         </label>
                                                     </div>
-                                                </div>
+                                                </div> */}
 
+                                                <div className="col-lg-4 col-md-6 mb-3">
+                                                    <label htmlFor="number_of_floors" className="form-label small">
+                                                        Number of Floors <span className="text-danger fw-bolder">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        className="form-control form-control-sm"
+                                                        id="number_of_floors"
+                                                        name="number_of_floors"
+                                                        value={formData.number_of_floors}
+                                                        onChange={handleInputChange}
+                                                        placeholder="Number of floors"
+                                                        min="1"
+                                                        max="3"
+                                                        required
+                                                    />
+                                                </div>
 
                                                 {/* Extra Features */}
                                                 <div className="col-12 mb-3">
@@ -315,7 +374,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                     <button
                                                         type="submit"
                                                         className="btn btn-primary btn-rounded"
-                                                        disabled={loading}
+                                                        disabled={loading || result}
                                                     >
                                                         {loading ? (
                                                             <>
@@ -383,23 +442,26 @@ const ArchitectureDesign = ({ stepper }) => {
                                                 {/* Architecture Design Image */}
                                                 {result.blueprint_url && (
                                                     <div className="col-lg-12 mb-4">
-                                                        <div className="card h-100">
+                                                        <div className="card h-100 shadow-lg">
                                                             <div className="card-header bg-light">
                                                                 <h6 className="mb-0 fs-6">Blueprint</h6>
                                                             </div>
                                                             <div className="card-body p-3">
-                                                                <img
-                                                                    src={result.blueprint_url}
-                                                                    alt="Blueprint"
-                                                                    className="img-fluid rounded shadow-sm w-100"
-                                                                    style={{ objectFit: 'contain', maxHeight: '500px' }}
-                                                                />
+                                                                <Zoom>
+                                                                    <img
+                                                                        src={result.blueprint_url}
+                                                                        alt="Blueprint"
+                                                                        className="img-fluid rounded shadow-sm w-100"
+                                                                        style={{ objectFit: 'contain', maxHeight: '500px' }}
+                                                                    />
+                                                                </Zoom>
                                                             </div>
                                                             <div className="card-footer bg-light">
                                                                 <a
                                                                     href={result.blueprint_url}
                                                                     download="blueprint.jpg"
                                                                     className="btn btn-sm btn-primary w-100"
+                                                                    target='_blank'
                                                                 >
                                                                     <i className="bi bi-download me-2"></i>
                                                                     Download Blueprint
@@ -412,23 +474,26 @@ const ArchitectureDesign = ({ stepper }) => {
                                                 {/* Front Elevation Render */}
                                                 {result.elevation_url && (
                                                     <div className="col-lg-12 mb-4">
-                                                        <div className="card h-100">
+                                                        <div className="card h-100 shadow-lg">
                                                             <div className="card-header bg-light">
                                                                 <h6 className="mb-0 fs-6">Front Elevation Render</h6>
                                                             </div>
                                                             <div className="card-body p-3">
-                                                                <img
-                                                                    src={result.elevation_url}
-                                                                    alt="Front Elevation Render"
-                                                                    className="img-fluid rounded shadow-sm w-100"
-                                                                    style={{ objectFit: 'contain', maxHeight: '500px' }}
-                                                                />
+                                                                <Zoom>
+                                                                    <img
+                                                                        src={result.elevation_url}
+                                                                        alt="Front Elevation Render"
+                                                                        className="img-fluid rounded shadow-sm w-100"
+                                                                        style={{ objectFit: 'contain', maxHeight: '500px' }}
+                                                                    />
+                                                                </Zoom>
                                                             </div>
                                                             <div className="card-footer bg-light">
                                                                 <a
                                                                     href={result.elevation_url}
                                                                     download="front-elevation.jpg"
                                                                     className="btn btn-sm btn-primary w-100"
+                                                                    target='_blank'
                                                                 >
                                                                     <i className="bi bi-download me-2"></i>
                                                                     Download Front Elevation
@@ -459,6 +524,9 @@ const ArchitectureDesign = ({ stepper }) => {
                                                                 </li>
                                                                 <li className="mb-2">
                                                                     <strong>Kitchen Type:</strong> {formData.kitchen_type}
+                                                                </li>
+                                                                <li className="mb-2">
+                                                                    <strong>Number of Floors:</strong> {formData.number_of_floors}
                                                                 </li>
                                                             </ul>
                                                         </div>
