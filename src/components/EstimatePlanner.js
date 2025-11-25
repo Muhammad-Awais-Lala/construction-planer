@@ -312,7 +312,7 @@ const EstimatePlanner = ({ onEstimateComplete, stepper }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-    const handleReset = () => {
+  const handleReset = () => {
     localStorage.clear();
     window.location.reload();
   };
@@ -374,7 +374,7 @@ const EstimatePlanner = ({ onEstimateComplete, stepper }) => {
 
   return (
     <div className="py-5">
-      <div className="container">
+      <div className="container-lg">
         <div className="row justify-content-center">
           <div className="col-lg-12">
             <div className="card shadow-lg">

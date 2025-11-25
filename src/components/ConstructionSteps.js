@@ -58,15 +58,6 @@ const ConstructionSteps = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  const handleReset = () => {
-    setActiveStep(0);
-    setEstimateData(null);
-    setMaterialsConfirmed(false);
-    // localStorage.removeItem('constructionEstimate');
-    localStorage.clear();
-    window.location.reload();
-  };
-
   const stepper = (
     <Stepper
       activeStep={activeStep}
@@ -83,6 +74,11 @@ const ConstructionSteps = () => {
           borderColor: '#000',
           borderWidth: 2,
         },
+        // Responsive padding
+        px: { xs: 0, sm: 1, md: 2 },
+        // Prevent horizontal overflow
+        overflowX: 'auto',
+        overflowY: 'hidden',
       }}
     >
       {steps.map((step, index) => (
@@ -91,31 +87,34 @@ const ConstructionSteps = () => {
             StepIconProps={{
               sx: {
                 '&.Mui-completed': {
-                  color: '#000', // Green for completed steps
+                  color: '#000',
                 },
                 '&.Mui-active': {
-                  color: '#000', // Orange for active step
+                  color: '#000',
                 },
                 '&.Mui-disabled': {
-                  color: '#e0e0e0', // Light gray for inactive
+                  color: '#e0e0e0',
                 },
-                // fontSize: '2rem', // Larger icons
+                // Responsive icon size
+                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
               },
             }}
             sx={{
               '& .MuiStepLabel-label': {
-                // color: activeStep === index ? '#ff9800' : '#666',
                 fontWeight: activeStep === index ? 'bold' : 'normal',
                 '&.Mui-completed': {
                   color: '#000',
                   fontWeight: 'bold',
                 },
+                // Responsive font size
+                fontSize: { xs: '0.7rem', sm: '0.85rem', md: '1rem' },
               },
             }}
           >
             <div className="text-center">
-              <div className="fw-bold fs-6">{step.label}</div>
-              <small className="text-muted">{step.description}</small>
+              <div className="fw-bold" style={{ fontSize: 'inherit' }}>{step.label}</div>
+              {/* Hide description on small screens */}
+              <small className="text-muted d-none d-md-block">{step.description}</small>
             </div>
           </StepLabel>
         </Step>
@@ -155,7 +154,6 @@ const ConstructionSteps = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
         <button className="btn btn-outline-primary btn-rounded" onClick={handleBack} disabled={activeStep === 0}><i className="bi bi-arrow-left me-1"></i> Back</button>
         <Box>
-          {/* <button className="btn btn-outline-dark btn-rounded me-1" onClick={handleReset}>Reset  <i className="bi bi-arrow-counterclockwise ms-1"></i></button> */}
           {activeStep < steps.length - 1 && (
             <button
               className="btn btn-primary btn-rounded"

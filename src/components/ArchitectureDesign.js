@@ -1,23 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 
 const ArchitectureDesign = ({ stepper }) => {
-    const [formData, setFormData] = useState({
-        plot_depth_ft: 60,
-        plot_width_ft: 20,
-        bedrooms: 2,
-        bathrooms: 2,
-        kitchen_type: 'open',
-        lounge_required: true,
-        drawing_dining_required: false,
-        garage_required: true,
-        architectural_style: 'Modern',
-        extra_features: ''
-    });
+    // Helper function to get initial form data from localStorage
+    const getInitialFormData = () => {
+        try {
+            const savedData = localStorage.getItem('constructionForm');
+            if (savedData) {
+                const constructionData = JSON.parse(savedData);
+
+                // Map constructionForm data to architecture design form
+                return {
+                    plot_depth_ft: constructionData.overallLength || 60,
+                    plot_width_ft: constructionData.overallWidth || 20,
+                    bedrooms: constructionData.numberOfBedrooms || 2,
+                    bathrooms: constructionData.numberOfBathrooms || 2,
+                    kitchen_type: 'open', // Default as not in constructionForm
+                    lounge_required: constructionData.numberOfLivingRooms > 0 || true,
+                    drawing_dining_required: constructionData.drawingDining === 'Required' || false,
+                    garage_required: constructionData.garage === 'Required' || true,
+                    architectural_style: constructionData.style === 'Pakistani' ? 'Traditional' : 'Modern',
+                    extra_features: constructionData.extraFeatures || ''
+                };
+            }
+        } catch (err) {
+            console.error('Error loading data from localStorage:', err);
+        }
+
+        // Return default values if localStorage is empty or error occurs
+        return {
+            plot_depth_ft: 60,
+            plot_width_ft: 20,
+            bedrooms: 2,
+            bathrooms: 2,
+            kitchen_type: 'open',
+            lounge_required: true,
+            drawing_dining_required: false,
+            garage_required: true,
+            architectural_style: 'Modern',
+            extra_features: ''
+        };
+    };
+
+    const [formData, setFormData] = useState(getInitialFormData());
 
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+
+    // Update form data when component mounts or localStorage changes
+    useEffect(() => {
+        const initialData = getInitialFormData();
+        setFormData(initialData);
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -65,18 +100,8 @@ const ArchitectureDesign = ({ stepper }) => {
     };
 
     const handleReset = () => {
-        setFormData({
-            plot_depth_ft: 60,
-            plot_width_ft: 20,
-            bedrooms: 2,
-            bathrooms: 2,
-            kitchen_type: 'open',
-            lounge_required: true,
-            drawing_dining_required: false,
-            garage_required: true,
-            architectural_style: 'Modern',
-            extra_features: ''
-        });
+        const initialData = getInitialFormData();
+        setFormData(initialData);
         setResult(null);
         setError(null);
     };
@@ -106,6 +131,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                     </label>
                                                     <input
                                                         type="number"
+                                                        step="0.1"
                                                         className="form-control form-control-sm"
                                                         id="plot_depth_ft"
                                                         name="plot_depth_ft"
@@ -123,6 +149,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                     </label>
                                                     <input
                                                         type="number"
+                                                        step="0.1"
                                                         className="form-control form-control-sm"
                                                         id="plot_width_ft"
                                                         name="plot_width_ft"
@@ -345,7 +372,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                 {/* Results Display */}
                                 {result && !loading && (
                                     <div className="card">
-                                        <div className="card-header bg-success text-white">
+                                        <div className="card-header bg-dark text-white">
                                             <h5 className="mb-0 fs-5">
                                                 <i className="bi bi-check-circle-fill me-2"></i>
                                                 Architecture Design Generated Successfully
@@ -355,7 +382,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                             <div className="row">
                                                 {/* Architecture Design Image */}
                                                 {result.blueprint_url && (
-                                                    <div className="col-lg-6 mb-4">
+                                                    <div className="col-lg-12 mb-4">
                                                         <div className="card h-100">
                                                             <div className="card-header bg-light">
                                                                 <h6 className="mb-0 fs-6">Blueprint</h6>
@@ -384,7 +411,7 @@ const ArchitectureDesign = ({ stepper }) => {
 
                                                 {/* Front Elevation Render */}
                                                 {result.elevation_url && (
-                                                    <div className="col-lg-6 mb-4">
+                                                    <div className="col-lg-12 mb-4">
                                                         <div className="card h-100">
                                                             <div className="card-header bg-light">
                                                                 <h6 className="mb-0 fs-6">Front Elevation Render</h6>

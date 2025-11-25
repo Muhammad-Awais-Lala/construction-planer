@@ -2,13 +2,13 @@ import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import './scss/_bootstrap.scss';
 import './App.css';
-import Routes from './pages/Routes';
+import Home from './pages/Home';
 
 function App() {
   return (
     <div className="App">
       <div className="container-fluid">
-        <Routes />
+        <Home />
       </div>
 
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light">
