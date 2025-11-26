@@ -353,14 +353,15 @@ const EstimatePlanner = ({ onEstimateComplete, stepper }) => {
             floorName: getFloorName(floor.floorNumber)
           }))
       };
-
-      console.log('Payload:', payload);
+      // localStorage.clear()
+      // console.log('Payload:', payload);
       const response = await axiosClient.post('/estimate', payload);
       const responseData = response.data;
       console.log('Response:', responseData);
       window.toastify('Estimate generated successfully', 'success');
       localStorage.removeItem("constructionMaterials")
       localStorage.removeItem("constructionTotalMaterialsCost")
+      localStorage.removeItem("architectureDesignImages")
 
       if (onEstimateComplete) {
         onEstimateComplete(responseData);
