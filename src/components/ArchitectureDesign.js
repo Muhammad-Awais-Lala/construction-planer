@@ -141,6 +141,33 @@ const ArchitectureDesign = ({ stepper }) => {
         window.toastify('Architecture design reset successfully', 'info');
     };
 
+    const handleDownloadImage = async (imageUrl, filename) => {
+        try {
+            // Fetch the image from Cloudinary
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+
+            // Create a local object URL from the blob
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            // Create and trigger download with the local URL
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+
+            window.toastify('Image downloaded successfully', 'success');
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.toastify('Failed to download image', 'error');
+        }
+    };
+
     return (
         <div className="py-5">
             <div className="container">
@@ -425,7 +452,7 @@ const ArchitectureDesign = ({ stepper }) => {
 
                                 {/* Results Display */}
                                 {result && !loading && (
-                                    <div className="card">
+                                    <div className="card shadow-lg">
                                         <div className="card-header bg-dark text-white">
                                             <h5 className="mb-0 fs-5">
                                                 <i className="bi bi-check-circle-fill me-2"></i>
@@ -444,31 +471,27 @@ const ArchitectureDesign = ({ stepper }) => {
                                                     return (
                                                         <div key={floorNum} className="col-lg-12 mb-4">
                                                             <div className="card h-100 shadow-lg">
-                                                                <div className="card-header bg-light">
-                                                                    <h6 className="mb-0 fs-6">
-                                                                        Floor {floorNum} Blueprint
-                                                                    </h6>
+                                                                <div className="card-header bg-primary text-center">
+                                                                    <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>Floor {floorNum} Blueprint</h5>
                                                                 </div>
                                                                 <div className="card-body p-3">
                                                                     <Zoom>
                                                                         <img
                                                                             src={blueprintUrl}
                                                                             alt={`Floor ${floorNum} Blueprint`}
-                                                                            className="img-fluid rounded shadow-sm w-100"
+                                                                            className="img-fluid rounded w-100"
                                                                             style={{ objectFit: 'contain', maxHeight: '500px' }}
                                                                         />
                                                                     </Zoom>
                                                                 </div>
                                                                 <div className="card-footer bg-light">
-                                                                    <a
-                                                                        href={blueprintUrl}
-                                                                        download={`floor-${floorNum}-blueprint.jpg`}
+                                                                    <button
+                                                                        onClick={() => handleDownloadImage(blueprintUrl, `floor-${floorNum}-blueprint.jpg`)}
                                                                         className="btn btn-sm btn-primary w-100"
-                                                                        target='_blank'
                                                                     >
                                                                         <i className="bi bi-download me-2"></i>
                                                                         Download Floor {floorNum} Blueprint
-                                                                    </a>
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -479,29 +502,27 @@ const ArchitectureDesign = ({ stepper }) => {
                                                 {result.elevation_url && (
                                                     <div className="col-lg-12 mb-4">
                                                         <div className="card h-100 shadow-lg">
-                                                            <div className="card-header bg-light">
-                                                                <h6 className="mb-0 fs-6">Front Elevation Render</h6>
+                                                            <div className="card-header bg-primary text-center">
+                                                                <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>Front Elevation</h5>
                                                             </div>
                                                             <div className="card-body p-3">
                                                                 <Zoom>
                                                                     <img
                                                                         src={result.elevation_url}
                                                                         alt="Front Elevation Render"
-                                                                        className="img-fluid rounded shadow-sm w-100"
+                                                                        className="img-fluid rounded w-100"
                                                                         style={{ objectFit: 'contain', maxHeight: '500px' }}
                                                                     />
                                                                 </Zoom>
                                                             </div>
                                                             <div className="card-footer bg-light">
-                                                                <a
-                                                                    href={result.elevation_url}
-                                                                    download="front-elevation.jpg"
+                                                                <button
+                                                                    onClick={() => handleDownloadImage(result.elevation_url, 'front-elevation.jpg')}
                                                                     className="btn btn-sm btn-primary w-100"
-                                                                    target='_blank'
                                                                 >
                                                                     <i className="bi bi-download me-2"></i>
                                                                     Download Front Elevation
-                                                                </a>
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -509,7 +530,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                             </div>
 
                                             {/* Design Summary */}
-                                            <div className="card mt-3 shadow-lg">
+                                            {/* <div className="card mt-3 shadow-lg">
                                                 <div className="card-header bg-light">
                                                     <h6 className="mb-0 fs-6">Design Summary</h6>
                                                 </div>
@@ -557,7 +578,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </div>
                                     </div>
                                 )}
