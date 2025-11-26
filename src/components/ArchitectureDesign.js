@@ -452,64 +452,66 @@ const ArchitectureDesign = ({ stepper }) => {
 
                                 {/* Results Display */}
                                 {result && !loading && (
-                                    <div className="card shadow-lg">
-                                        <div className="card-header bg-dark text-white">
-                                            <h5 className="mb-0 fs-5">
-                                                <i className="bi bi-check-circle-fill me-2"></i>
-                                                Architecture Design Generated Successfully
-                                            </h5>
+                                    <>
+                                        {/* Section Divider */}
+                                        <div className="card  shadow-lg text-center my-4">
+                                            {/* <hr className="my-3" /> */}
+                                            <h4 className="my-3">
+                                                <i className="bi bi-images me-2"></i>
+                                                Generated Architecture Designs
+                                            </h4>
+                                            {/* <hr className="my-3" /> */}
                                         </div>
-                                        <div className="card-body">
-                                            <div className="row">
-                                                {/* Dynamic Floor Blueprints */}
-                                                {[1, 2, 3].map((floorNum) => {
-                                                    const blueprintKey = `floor_${floorNum}_blueprint_url`;
-                                                    const blueprintUrl = result[blueprintKey];
 
-                                                    if (!blueprintUrl) return null;
+                                        {/* Front Elevation Render */}
+                                        {result.elevation_url && (
+                                            <div className="col-lg-12 mb-4">
+                                                <div className="card h-100 shadow-lg">
+                                                    <div className="card-header bg-primary text-center">
+                                                        <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>Front Elevation</h5>
+                                                    </div>
+                                                    <div className="card-body p-3">
+                                                        <Zoom>
+                                                            <img
+                                                                src={result.elevation_url}
+                                                                alt="Front Elevation Render"
+                                                                className="img-fluid rounded w-100"
+                                                                style={{ objectFit: 'contain', maxHeight: '500px' }}
+                                                            />
+                                                        </Zoom>
+                                                    </div>
+                                                    <div className="card-footer bg-light">
+                                                        <button
+                                                            onClick={() => handleDownloadImage(result.elevation_url, 'front-elevation.jpg')}
+                                                            className="btn btn-sm btn-primary w-100"
+                                                        >
+                                                            <i className="bi bi-download me-2"></i>
+                                                            Download Front Elevation
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
 
-                                                    return (
-                                                        <div key={floorNum} className="col-lg-12 mb-4">
-                                                            <div className="card h-100 shadow-lg">
-                                                                <div className="card-header bg-primary text-center">
-                                                                    <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>Floor {floorNum} Blueprint</h5>
-                                                                </div>
-                                                                <div className="card-body p-3">
-                                                                    <Zoom>
-                                                                        <img
-                                                                            src={blueprintUrl}
-                                                                            alt={`Floor ${floorNum} Blueprint`}
-                                                                            className="img-fluid rounded w-100"
-                                                                            style={{ objectFit: 'contain', maxHeight: '500px' }}
-                                                                        />
-                                                                    </Zoom>
-                                                                </div>
-                                                                <div className="card-footer bg-light">
-                                                                    <button
-                                                                        onClick={() => handleDownloadImage(blueprintUrl, `floor-${floorNum}-blueprint.jpg`)}
-                                                                        className="btn btn-sm btn-primary w-100"
-                                                                    >
-                                                                        <i className="bi bi-download me-2"></i>
-                                                                        Download Floor {floorNum} Blueprint
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
+                                        <div className="row">
+                                            {/* Dynamic Floor Blueprints */}
+                                            {[1, 2, 3].map((floorNum) => {
+                                                const blueprintKey = `floor_${floorNum}_blueprint_url`;
+                                                const blueprintUrl = result[blueprintKey];
 
-                                                {/* Front Elevation Render */}
-                                                {result.elevation_url && (
-                                                    <div className="col-lg-12 mb-4">
+                                                if (!blueprintUrl) return null;
+
+                                                return (
+                                                    <div key={floorNum} className="col-lg-12 mb-4">
                                                         <div className="card h-100 shadow-lg">
                                                             <div className="card-header bg-primary text-center">
-                                                                <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>Front Elevation</h5>
+                                                                <h5 className="mb-0 fs-5"><i className="bi bi-building me-2"></i>Floor {floorNum} Blueprint</h5>
                                                             </div>
                                                             <div className="card-body p-3">
                                                                 <Zoom>
                                                                     <img
-                                                                        src={result.elevation_url}
-                                                                        alt="Front Elevation Render"
+                                                                        src={blueprintUrl}
+                                                                        alt={`Floor ${floorNum} Blueprint`}
                                                                         className="img-fluid rounded w-100"
                                                                         style={{ objectFit: 'contain', maxHeight: '500px' }}
                                                                     />
@@ -517,20 +519,23 @@ const ArchitectureDesign = ({ stepper }) => {
                                                             </div>
                                                             <div className="card-footer bg-light">
                                                                 <button
-                                                                    onClick={() => handleDownloadImage(result.elevation_url, 'front-elevation.jpg')}
+                                                                    onClick={() => handleDownloadImage(blueprintUrl, `floor-${floorNum}-blueprint.jpg`)}
                                                                     className="btn btn-sm btn-primary w-100"
                                                                 >
                                                                     <i className="bi bi-download me-2"></i>
-                                                                    Download Front Elevation
+                                                                    Download Floor {floorNum} Blueprint
                                                                 </button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                )}
-                                            </div>
+                                                );
+                                            })}
 
-                                            {/* Design Summary */}
-                                            {/* <div className="card mt-3 shadow-lg">
+
+                                        </div>
+
+                                        {/* Design Summary */}
+                                        {/* <div className="card mt-3 shadow-lg">
                                                 <div className="card-header bg-light">
                                                     <h6 className="mb-0 fs-6">Design Summary</h6>
                                                 </div>
@@ -579,8 +584,7 @@ const ArchitectureDesign = ({ stepper }) => {
                                                     )}
                                                 </div>
                                             </div> */}
-                                        </div>
-                                    </div>
+                                    </>
                                 )}
 
                                 {/* Empty State */}
